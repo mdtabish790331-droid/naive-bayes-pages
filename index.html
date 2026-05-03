@@ -17,8 +17,733 @@
     <!-- MathJax for Formulas -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ========== GLOBAL STYLES ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ========== SIDEBAR STYLES ========== */
+        .sidebar {
+            width: 300px;
+            background: linear-gradient(180deg, #1a252f 0%, #0f1a24 100%);
+            color: #ecf0f1;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            transition: all 0.3s ease;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            font-size: 1.4rem;
+            border-bottom: 1px solid #2c3e50;
+            margin-bottom: 1rem;
+            background: rgba(255,255,255,0.05);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0 0.5rem;
+        }
+
+        .sidebar ul li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 0.95rem;
+            border-radius: 12px;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .sidebar ul li a:hover {
+            background: rgba(52, 152, 219, 0.2);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .sidebar ul li a.active {
+            background: linear-gradient(90deg, #2980b9, #3498db);
+            color: white;
+            box-shadow: 0 2px 8px rgba(41,128,185,0.3);
+        }
+
+        .sidebar ul li a.completed {
+            color: #2ecc71;
+        }
+
+        .sidebar ul li a.completed .check-icon {
+            opacity: 1;
+        }
+
+        .nav-icon {
+            width: 24px;
+            font-size: 1.1rem;
+        }
+
+        .check-icon {
+            margin-left: auto;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .sidebar ul li a.completed .check-icon {
+            opacity: 1;
+            color: #2ecc71;
+        }
+
+        .progress-reset {
+            padding: 1.5rem;
+            margin-top: 1rem;
+            border-top: 1px solid #2c3e50;
+        }
+
+        /* Scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: #1a252f;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 10px;
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .content {
+            flex: 1;
+            margin-left: 300px;
+            padding: 2rem;
+            max-width: calc(100% - 300px);
+        }
+
+        .main-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .main-header h1 {
+            font-size: 2.2rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        /* ========== CARD STYLES ========== */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            font-size: 1.6rem;
+            margin-bottom: 1.2rem;
+            color: #2c3e50;
+            border-left: 5px solid #3498db;
+            padding-left: 1rem;
+        }
+
+        .icon-heading {
+            margin-right: 10px;
+            color: #3498db;
+        }
+
+        /* Edu Layer */
+        .edu-layer {
+            background: linear-gradient(135deg, #e8f4fd 0%, #d6ecfa 100%);
+            padding: 1.2rem;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #3498db;
+        }
+
+        .edu-layer p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .edu-layer i {
+            color: #3498db;
+            width: 28px;
+        }
+
+        .content-block {
+            margin-bottom: 1.5rem;
+        }
+
+        .content-block p {
+            margin-bottom: 0.8rem;
+            color: #34495e;
+        }
+
+        /* Split Content */
+        .split-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .content-box {
+            background: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 16px;
+        }
+
+        .content-box h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        /* Tables */
+        .demo-tables {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .table-mini {
+            background: white;
+            padding: 0.8rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .table-mini table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-mini th, .table-mini td {
+            padding: 6px 12px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52,152,219,0.3);
+        }
+
+        .secondary-btn {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .table-container {
+            margin-top: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .table-container th, .table-container td {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            text-align: left;
+        }
+
+        .table-container th {
+            background: #3498db;
+            color: white;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .chart-wrapper {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 16px;
+        }
+
+        .chart-wrapper canvas {
+            max-height: 250px;
+        }
+
+        .chart-explanation {
+            margin-top: 0.8rem;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            background: white;
+            padding: 0.8rem;
+            border-radius: 10px;
+        }
+
+        .placeholder-text {
+            text-align: center;
+            padding: 3rem;
+            color: #95a5a6;
+            background: #f8f9fa;
+            border-radius: 16px;
+        }
+
+        /* Training Controls */
+        .training-controls {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+
+        .progress-container {
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            transition: width 0.3s;
+        }
+
+        .training-summary {
+            margin-top: 1.5rem;
+            background: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 16px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .summary-box {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .styled-table th, .styled-table td {
+            padding: 6px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        /* Flow Diagram */
+        .flow-diagram {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .flow-step {
+            background: #f0f4f8;
+            padding: 0.8rem 1.2rem;
+            border-radius: 40px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .flow-step.highlight-step {
+            background: #3498db;
+            color: white;
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: #3498db;
+        }
+
+        /* Formula Box */
+        .formula-box {
+            background: #2c3e50;
+            color: white;
+            padding: 1.2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .formula-box h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Definitions */
+        .definitions-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .def-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 12px;
+            border-left: 3px solid #3498db;
+        }
+
+        /* Example Grid */
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1rem;
+        }
+
+        .step-box {
+            background: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 16px;
+        }
+
+        .highlight-step-card {
+            background: linear-gradient(135deg, #e8f4fd, #d6ecfa);
+            border: 2px solid #3498db;
+        }
+
+        .math-block {
+            background: #2c3e50;
+            color: #e8e8e8;
+            padding: 0.8rem;
+            border-radius: 10px;
+            margin: 0.8rem 0;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+
+        .likelihoods-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin-top: 0.8rem;
+        }
+
+        .conclusion-box {
+            background: #27ae60;
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            margin-top: 1rem;
+        }
+
+        .tabs-header {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1rem 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .code-block-wrapper {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block-wrapper h3 {
+            color: #d4d4d4;
+            margin-bottom: 0.8rem;
+        }
+
+        .code-block-wrapper pre {
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        /* Prediction Form */
+        .prediction-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 0.9rem;
+        }
+
+        .result-box {
+            margin-top: 1.5rem;
+            background: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 16px;
+        }
+
+        .calc-steps {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .calc-step {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .final-verdict-box {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 16px;
+            margin-top: 1rem;
+            transition: all 0.3s;
+        }
+
+        .verdict-heading {
+            font-size: 1.8rem;
+            margin: 0.5rem 0;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .metric-formula {
+            background: #2c3e50;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            margin: 0.8rem 0;
+            font-size: 0.9rem;
+        }
+
+        .metric-interp {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+        }
+
+        /* Footer */
+        .main-footer {
+            background: #1a252f;
+            color: #bdc3c7;
+            text-align: center;
+            padding: 2rem;
+            border-radius: 20px;
+            margin-top: 1rem;
+        }
+
+        .main-footer h3 {
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .student-info {
+            margin: 0.5rem 0;
+        }
+
+        .disclaimer {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+                transform: translateX(-100%);
+            }
+            .content {
+                margin-left: 0;
+                max-width: 100%;
+            }
+            .split-content {
+                grid-template-columns: 1fr;
+            }
+            .calc-steps {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .text-primary {
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .text-muted {
+            color: #95a5a6;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            background: white;
+        }
+    </style>
 </head>
 <body>
 
@@ -447,7 +1172,7 @@
                     </div>
                     <div class="code-block-wrapper">
                         <h3>Gaussian Naive Bayes (Continuous Data)</h3>
-<pre><code class="language-python">import pandas as pd
+<pre><code>import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
@@ -471,7 +1196,7 @@ print(f"Accuracy: {accuracy_score(y_test, predictions):.2f}")</code></pre>
                     
                     <div class="code-block-wrapper">
                         <h3>Multinomial Naive Bayes (Text/Count Data)</h3>
-<pre><code class="language-python">from sklearn.feature_extraction.text import CountVectorizer
+<pre><code>from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import make_pipeline
 
@@ -596,17 +1321,380 @@ print("Prediction:", model.predict(new_email))</code></pre>
             </div>
         </section>
 
-       <footer class="main-footer">
-    <div class="footer-content">
-        <h3>Naive Bayes Educational Dashboard</h3>
-        <p class="student-info">Created by: <strong>Your Name</strong> | Course: Machine Learning | Academic Project</p>
-        <p class="disclaimer">Educational demonstration of Naive Bayes classification algorithm.</p>
-    </div>
-</footer>
+        <!-- FOOTER - CORRECTED WITH MOHAMMAD DANISH -->
+        <footer class="main-footer">
+            <div class="footer-content">
+                <h3>Naive Bayes Educational Dashboard</h3>
+                <p class="student-info">Developed by: <strong>MOHAMMAD DANISH</strong> | B.Tech CSE (AI-ML) 4th SEM | Roll No: 120308244061</p>
+                <p class="disclaimer">Designed for academic and educational demonstrations.</p>
+            </div>
+        </footer>
     </main>
 </div>
 
-<script src="script.js"></script>
+<script>
+// LocalStorage for Sidebar Progress
+let completedSections = JSON.parse(localStorage.getItem('naiveBayesProgress')) || [];
+
+function updateSidebarProgress() {
+    navLinks.forEach(link => {
+        const sectionId = link.getAttribute('href').substring(1);
+        if (completedSections.includes(sectionId)) {
+            link.classList.add('completed');
+        }
+    });
+}
+
+function markSectionCompleted(sectionId) {
+    if (!completedSections.includes(sectionId)) {
+        completedSections.push(sectionId);
+        localStorage.setItem('naiveBayesProgress', JSON.stringify(completedSections));
+        updateSidebarProgress();
+    }
+}
+
+// Sidebar active link logic
+const sections = document.querySelectorAll('section');
+const navLinks = document.querySelectorAll('.sidebar ul li a');
+
+// Initialize sidebar progress on load
+updateSidebarProgress();
+
+// Reset progress logic
+const resetProgressBtn = document.getElementById('resetProgressBtn');
+if (resetProgressBtn) {
+    resetProgressBtn.addEventListener('click', () => {
+        if(confirm('Are you sure you want to reset your learning progress?')) {
+            completedSections = [];
+            localStorage.removeItem('naiveBayesProgress');
+            navLinks.forEach(link => link.classList.remove('completed'));
+        }
+    });
+}
+
+window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (pageYOffset >= (sectionTop - sectionHeight / 3)) {
+            current = section.getAttribute('id');
+        }
+    });
+
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href').includes(current)) {
+            link.classList.add('active');
+            if (current) {
+                markSectionCompleted(current);
+            }
+        }
+    });
+});
+
+// Smooth scrolling and mark as completed on click
+navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        markSectionCompleted(targetId);
+        const targetSection = document.getElementById(targetId);
+        window.scrollTo({
+            top: targetSection.offsetTop - 20,
+            behavior: 'smooth'
+        });
+    });
+});
+
+// Tab Switching Logic for Code Section
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+
+tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        const targetId = btn.getAttribute('data-target');
+        document.getElementById(targetId).classList.add('active');
+    });
+});
+
+// PapaParse CSV Upload logic
+const csvFileInput = document.getElementById('csvFileInput');
+const uploadBtn = document.getElementById('uploadBtn');
+const tableContainer = document.getElementById('tableContainer');
+const csvTableHead = document.querySelector('#csvTable thead');
+const csvTableBody = document.querySelector('#csvTable tbody');
+
+let edaChartInstance = null;
+let edaPieChartInstance = null;
+
+uploadBtn.addEventListener('click', () => {
+    const file = csvFileInput.files[0];
+    if (!file) {
+        alert("Please select a CSV file first.");
+        return;
+    }
+
+    Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            const data = results.data;
+            if (data.length > 0) {
+                renderTable(data);
+                generateEDA(data);
+            }
+        }
+    });
+});
+
+function renderTable(data) {
+    csvTableHead.innerHTML = '';
+    csvTableBody.innerHTML = '';
+
+    const headers = Object.keys(data[0]);
+    const headerRow = document.createElement('tr');
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        headerRow.appendChild(th);
+    });
+    csvTableHead.appendChild(headerRow);
+
+    const rowsToShow = Math.min(5, data.length);
+    for (let i = 0; i < rowsToShow; i++) {
+        const tr = document.createElement('tr');
+        headers.forEach(headerText => {
+            const td = document.createElement('td');
+            td.textContent = data[i][headerText];
+            tr.appendChild(td);
+        });
+        csvTableBody.appendChild(tr);
+    }
+    tableContainer.style.display = 'block';
+}
+
+function generateEDA(data) {
+    const headers = Object.keys(data[0]);
+    const targetColumn = headers[headers.length - 1];
+
+    const classCounts = {};
+    data.forEach(row => {
+        const val = row[targetColumn];
+        if(val) classCounts[val] = (classCounts[val] || 0) + 1;
+    });
+
+    const labels = Object.keys(classCounts);
+    const counts = Object.values(classCounts);
+
+    const ctxBar = document.getElementById('edaChart').getContext('2d');
+    const ctxPie = document.getElementById('edaPieChart').getContext('2d');
+    
+    if (edaChartInstance) edaChartInstance.destroy();
+    if (edaPieChartInstance) edaPieChartInstance.destroy();
+
+    document.getElementById('chartPlaceholder').style.display = 'none';
+    document.getElementById('edaChartsGrid').style.display = 'grid';
+
+    const colors = [
+        'rgba(41, 128, 185, 0.8)',
+        'rgba(231, 76, 60, 0.8)',
+        'rgba(46, 204, 113, 0.8)',
+        'rgba(241, 196, 15, 0.8)'
+    ];
+    const borderColors = colors.map(c => c.replace('0.8', '1'));
+
+    edaChartInstance = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Count',
+                data: counts,
+                backgroundColor: colors,
+                borderColor: borderColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) { return `Count: ${context.raw}`; }
+                    }
+                }
+            },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    edaPieChartInstance = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: counts,
+                backgroundColor: colors,
+                borderColor: borderColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a,b)=>a+b, 0);
+                            const percent = ((context.raw / total) * 100).toFixed(1);
+                            return `${context.label}: ${context.raw} (${percent}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Training Logic Simulation
+const splitSlider = document.getElementById('splitSlider');
+const splitValue = document.getElementById('splitValue');
+const trainBtn = document.getElementById('trainBtn');
+const trainingProgress = document.getElementById('trainingProgress');
+const trainingSummary = document.getElementById('trainingSummary');
+
+if (splitSlider) {
+    splitSlider.addEventListener('input', (e) => {
+        const trainPct = e.target.value;
+        const testPct = 100 - trainPct;
+        splitValue.textContent = `${trainPct}% Train / ${testPct}% Test`;
+    });
+}
+
+if (trainBtn) {
+    trainBtn.addEventListener('click', () => {
+        trainingSummary.style.display = 'none';
+        trainingProgress.style.display = 'block';
+        trainBtn.disabled = true;
+        trainBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Training...';
+        
+        let progress = 0;
+        const fill = document.querySelector('.progress-fill');
+        const interval = setInterval(() => {
+            progress += 20;
+            fill.style.width = `${progress}%`;
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    trainingProgress.style.display = 'none';
+                    trainingSummary.style.display = 'block';
+                    fill.style.width = '0%';
+                    trainBtn.disabled = false;
+                    trainBtn.innerHTML = '<i class="fas fa-play"></i> Train Model';
+                }, 400);
+            }
+        }, 200);
+    });
+}
+
+// Prediction Logic Demo (Weather Dataset)
+const priors = { Yes: 9/14, No: 5/14 };
+const likelihoods = {
+    Yes: {
+        Outlook: { Sunny: 2/9, Overcast: 4/9, Rain: 3/9 },
+        Humidity: { High: 3/9, Normal: 6/9 },
+        Wind: { Weak: 6/9, Strong: 3/9 }
+    },
+    No: {
+        Outlook: { Sunny: 3/5, Overcast: 0/5, Rain: 2/5 },
+        Humidity: { High: 4/5, Normal: 1/5 },
+        Wind: { Weak: 2/5, Strong: 3/5 }
+    }
+};
+
+const predictBtn = document.getElementById('predictBtn');
+if (predictBtn) {
+    predictBtn.addEventListener('click', () => {
+        const outlook = document.getElementById('inputOutlook').value;
+        const humidity = document.getElementById('inputHumidity').value;
+        const wind = document.getElementById('inputWind').value;
+
+        const probYes = priors.Yes * likelihoods.Yes.Outlook[outlook] * likelihoods.Yes.Humidity[humidity] * likelihoods.Yes.Wind[wind];
+        const probNo = priors.No * likelihoods.No.Outlook[outlook] * likelihoods.No.Humidity[humidity] * likelihoods.No.Wind[wind];
+
+        const resultBox = document.getElementById('predictionResult');
+        const calcYesText = document.getElementById('calcYesText');
+        const calcNoText = document.getElementById('calcNoText');
+        const finalVerdict = document.getElementById('finalVerdict');
+        const verdictExplanation = document.getElementById('verdictExplanation');
+
+        calcYesText.innerHTML = `P(Yes) &times; P(${outlook}|Yes) &times; P(${humidity}|Yes) &times; P(${wind}|Yes) <br><br> = ${priors.Yes.toFixed(3)} &times; ${likelihoods.Yes.Outlook[outlook].toFixed(3)} &times; ${likelihoods.Yes.Humidity[humidity].toFixed(3)} &times; ${likelihoods.Yes.Wind[wind].toFixed(3)} <br><br> = <strong>${probYes.toFixed(4)}</strong>`;
+        
+        calcNoText.innerHTML = `P(No) &times; P(${outlook}|No) &times; P(${humidity}|No) &times; P(${wind}|No) <br><br> = ${priors.No.toFixed(3)} &times; ${likelihoods.No.Outlook[outlook].toFixed(3)} &times; ${likelihoods.No.Humidity[humidity].toFixed(3)} &times; ${likelihoods.No.Wind[wind].toFixed(3)} <br><br> = <strong>${probNo.toFixed(4)}</strong>`;
+
+        const verdictBox = document.querySelector('.final-verdict-box');
+
+        if (probYes > probNo) {
+            finalVerdict.innerHTML = "YES (Play Golf)";
+            finalVerdict.style.color = "#16a34a";
+            verdictBox.style.borderColor = "#16a34a";
+            verdictBox.style.backgroundColor = "#eafaf1";
+            verdictExplanation.innerHTML = `Because <strong>${probYes.toFixed(4)}</strong> > <strong>${probNo.toFixed(4)}</strong>, the model assigns the class 'Yes'.`;
+        } else {
+            finalVerdict.innerHTML = "NO (Do NOT Play Golf)";
+            finalVerdict.style.color = "#dc2626";
+            verdictBox.style.borderColor = "#dc2626";
+            verdictBox.style.backgroundColor = "#fef2f2";
+            verdictExplanation.innerHTML = `Because <strong>${probNo.toFixed(4)}</strong> > <strong>${probYes.toFixed(4)}</strong>, the model assigns the class 'No'.`;
+        }
+
+        resultBox.style.display = 'block';
+        
+        setTimeout(() => {
+            resultBox.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+        }, 100);
+    });
+}
+
+// Missing values handler
+const applyMissingBtn = document.getElementById('applyMissingBtn');
+if (applyMissingBtn) {
+    applyMissingBtn.addEventListener('click', () => {
+        const strategy = document.getElementById('missingStrategy').value;
+        const resultCell = document.querySelector('#missingResultTable tbody tr:nth-child(2) td');
+        if (strategy === 'mean') {
+            resultCell.innerHTML = '30 (Mean)';
+            resultCell.style.color = '#16a34a';
+        } else if (strategy === 'median') {
+            resultCell.innerHTML = '30 (Median)';
+            resultCell.style.color = '#16a34a';
+        } else if (strategy === 'drop') {
+            resultCell.innerHTML = 'Row Removed';
+            resultCell.style.color = '#e74c3c';
+        }
+    });
+}
+
+// Encoding handler
+const applyEncodingBtn = document.getElementById('applyEncodingBtn');
+if (applyEncodingBtn) {
+    applyEncodingBtn.addEventListener('click', () => {
+        const strategy = document.getElementById('encodingStrategy').value;
+        const table = document.getElementById('encodingResultTable');
+        if (strategy === 'label') {
+            table.innerHTML = '<tr><th>Color</th></tr><tr><td style="color:#16a34a; font-weight:bold;">0</td></tr><tr><td style="color:#16a34a; font-weight:bold;">1</td></tr>';
+        } else if (strategy === 'onehot') {
+            table.innerHTML = '<tr><th>Red</th><th>Blue</th></tr><tr><td style="color:#16a34a; font-weight:bold;">1</td><td style="color:#16a34a; font-weight:bold;">0</td></tr><tr><td style="color:#16a34a; font-weight:bold;">0</td><td style="color:#16a34a; font-weight:bold;">1</td></tr>';
+        }
+    });
+}
+</script>
 </body>
 </html>
-
