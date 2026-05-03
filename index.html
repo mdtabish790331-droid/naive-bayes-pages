@@ -1,1 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naive Bayes Educational Dashboard</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%232980b9' d='M416 176c0-35.3-28.7-64-64-64s-64 28.7-64 64c0 14.5 4.8 27.9 13 38.6l-98 81.7c-9.3-5.3-20-8.3-31-8.3c-35.3 0-64 28.7-64 64s28.7 64 64 64s64-28.7 64-64c0-6.7-1-13-3-19.1l102.2-74c10 8.5 23 13.1 36.8 13.1c35.3 0 64-28.7 64-64s-28.7-64-64-64zm0 96c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32zM172 352c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32zm180-64c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z'/></svg>">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PapaParse for CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Chart.js for EDA -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- MathJax for Formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <h2>Naive Bayes Dashboard</h2>
+        <ul id="sidebarMenu">
+            <li><a href="#intro" class="active"><i class="fas fa-book-open nav-icon"></i> 1. Introduction <i class="fas fa-check-circle check-icon"></i></a></li>
+            <li><a href="#upload"><i class="fas fa-file-csv nav-icon"></i> 2. Data Upload <i class="fas fa-check-circle check-icon"></i></a></li>
+            <li><a href="#preprocessing"><i class="fas fa-tools nav-icon"></i> 3. Preprocessing <i class="fas fa-check-circle check-icon"></i></a></li>
+            <li><a href="#eda"><i class="fas fa-chart-bar nav-icon"></i> 4. Exploratory Analysis <i class="fas fa-check-circle check-icon"></i></a></li>
+            <li><a href="#training"><i class="fas fa-cogs nav-icon"></i> 5. Model Training <i class="fas fa-check-circle check-icon"></i></a></li>
+            <li><a href="#algorithm"><i class="fas fa-calculator nav-icon"></i> 6. The Algorithm <i class="fas fa-check-circle check-icon"></i></a></li>
+            <li><a href="#example"><i class="fas fa-list-ol nav-icon"></i> 7. Practical Example <i class="fas fa-check-circle check-icon"></i></a></li>
+            <li><a href="#variants"><i class="fas fa-project-diagram nav-icon"></i> 8. Types &amp; Implementation <i class="fas fa-check-circle check-icon"></i></a></li>
+            <li><a href="#prediction"><i class="fas fa-magic nav-icon"></i> 9. Interactive Prediction <i class="fas fa-check-circle check-icon"></i></a></li>
+            <li><a href="#evaluation"><i class="fas fa-check-double nav-icon"></i> 10. Evaluation Metrics <i class="fas fa-check-circle check-icon"></i></a></li>
+        </ul>
+        <div class="progress-reset">
+            <button id="resetProgressBtn" class="btn secondary-btn"><i class="fas fa-redo"></i> Reset Progress</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+        
+        <header class="main-header fade-in">
+            <h1>Understanding the Naive Bayes Classifier</h1>
+            <p class="subtitle">An Interactive Educational Dashboard for Probabilistic Machine Learning</p>
+        </header>
+
+        <!-- Section 1: Intro -->
+        <section id="intro" class="card fade-in">
+            <h2><i class="fas fa-book-open icon-heading"></i> 1. Introduction to Naive Bayes</h2>
+            
+            <div class="edu-layer">
+                <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> A beginner-friendly introduction to a classic machine learning algorithm based on probability.</p>
+                <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> Understanding the core assumption helps you know exactly when to use (and not use) this powerful model.</p>
+            </div>
+
+            <div class="content-block">
+                <p><strong>Definition:</strong> The Naive Bayes classifier is a supervised machine learning algorithm based on Bayes' Theorem. It is fundamentally a probabilistic model that assigns class labels to instances by computing the conditional probability of each class given the observed features.</p>
+                <p><strong>The "Naive" Assumption:</strong> The algorithm is termed "naive" because it imposes an assumption of strong conditional independence between the features. This implies that the presence of a particular feature is entirely unrelated to any other feature. Although this is rarely true in reality, the classifier remains incredibly effective in areas like spam detection and medical diagnosis.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Data Upload -->
+        <section id="upload" class="card fade-in">
+            <h2><i class="fas fa-file-csv icon-heading"></i> 2. Data Upload &amp; Preview</h2>
+
+            <div class="edu-layer">
+                <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> The ingestion step where raw data (like a spreadsheet) is loaded into the system.</p>
+                <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> Machine learning cannot happen without data. Previewing it ensures it has been parsed correctly.</p>
+            </div>
+
+            <div class="content-block">
+                <p><strong>Overview:</strong> Empirical analysis relies on structured data. Upload a dataset in Comma-Separated Values (CSV) format to begin.</p>
+                <p>If the dataset includes a categorical target variable as its rightmost column, it will be automatically utilized in the Exploratory Data Analysis (EDA) module.</p>
+            </div>
+            
+            <div class="upload-area">
+                <input type="file" id="csvFileInput" accept=".csv" />
+                <button id="uploadBtn" class="btn"><i class="fas fa-upload"></i> Load Dataset</button>
+            </div>
+            
+            <div id="tableContainer" class="table-container" style="display: none;">
+                <h3>Dataset Preview (Top 5 Records)</h3>
+                <table id="csvTable">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 3: Preprocessing -->
+        <section id="preprocessing" class="card fade-in">
+            <h2><i class="fas fa-tools icon-heading"></i> 3. Data Preprocessing</h2>
+            
+            <div class="edu-layer">
+                <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> Cleaning up the dataset to fix missing holes and converting text into numbers.</p>
+                <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> Algorithms are mathematical models; they crash if you feed them missing values or raw text strings.</p>
+            </div>
+            
+            <div class="split-content">
+                <div class="content-box">
+                    <h3><i class="fas fa-eraser"></i> Handling Missing Values</h3>
+                    <p><strong>Concept:</strong> Datasets frequently contain omissions (NaNs) due to human error.</p>
+                    
+                    <div class="interactive-demo">
+                        <label><strong>Try a Strategy:</strong></label>
+                        <select id="missingStrategy" class="form-control">
+                            <option value="mean">Impute with Mean (Average)</option>
+                            <option value="median">Impute with Median (Middle)</option>
+                            <option value="drop">Drop Rows</option>
+                        </select>
+                        <button id="applyMissingBtn" class="btn secondary-btn" style="margin-top:10px; padding: 0.5rem 1rem;">Apply Fix</button>
+                        
+                        <div class="demo-tables">
+                            <div class="table-mini">
+                                <strong>Before:</strong>
+                                <table>
+                                    <tr><th>Age</th></tr>
+                                    <tr><td>25</td></tr>
+                                    <tr><td style="color:#e74c3c; font-weight:bold;">NaN</td></tr>
+                                    <tr><td>35</td></tr>
+                                </table>
+                            </div>
+                            <div class="table-mini">
+                                <strong>After:</strong>
+                                <table id="missingResultTable">
+                                    <tr><th>Age</th></tr>
+                                    <tr><td>25</td></tr>
+                                    <tr><td style="color:#16a34a; font-weight:bold;">30 (Mean)</td></tr>
+                                    <tr><td>35</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-box">
+                    <h3><i class="fas fa-font"></i> Encoding Categorical Data</h3>
+                    <p><strong>Concept:</strong> Converting qualitative text variables (like colors or cities) into numerical representations.</p>
+                    
+                    <div class="interactive-demo">
+                        <label><strong>Try an Encoding:</strong></label>
+                        <select id="encodingStrategy" class="form-control">
+                            <option value="label">Label Encoding (0, 1, 2...)</option>
+                            <option value="onehot">One-Hot Encoding (Binary Columns)</option>
+                        </select>
+                        <button id="applyEncodingBtn" class="btn secondary-btn" style="margin-top:10px; padding: 0.5rem 1rem;">Apply Encoding</button>
+                        
+                        <div class="demo-tables">
+                            <div class="table-mini">
+                                <strong>Before:</strong>
+                                <table>
+                                    <tr><th>Color</th></tr>
+                                    <tr><td>Red</td></tr>
+                                    <tr><td>Blue</td></tr>
+                                </table>
+                            </div>
+                            <div class="table-mini">
+                                <strong>After:</strong>
+                                <table id="encodingResultTable">
+                                    <tr><th>Color</th></tr>
+                                    <tr><td style="color:#16a34a; font-weight:bold;">0</td></tr>
+                                    <tr><td style="color:#16a34a; font-weight:bold;">1</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: EDA -->
+        <section id="eda" class="card fade-in">
+            <h2><i class="fas fa-chart-bar icon-heading"></i> 4. Exploratory Data Analysis (EDA)</h2>
+            
+            <div class="edu-layer">
+                <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> Using graphs and visual charts to understand the patterns in the data before building the model.</p>
+                <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> It helps spot imbalances. If 90% of your data is 'Yes', the model will blindly predict 'Yes' to cheat at high accuracy.</p>
+            </div>
+            
+            <div class="charts-grid" id="edaChartsGrid" style="display: none;">
+                <div class="chart-wrapper">
+                    <h3>Class Distribution (Bar)</h3>
+                    <canvas id="edaChart"></canvas>
+                    <p class="chart-explanation"><strong>What this shows:</strong> The raw count of instances for each class in the target variable.<br><br><strong>Why it matters:</strong> Helps identify class imbalances that could severely bias the model.</p>
+                </div>
+                <div class="chart-wrapper">
+                    <h3>Proportional Prior (Doughnut)</h3>
+                    <canvas id="edaPieChart"></canvas>
+                    <p class="chart-explanation"><strong>What this shows:</strong> The percentage breakdown of the outcome classes.<br><br><strong>Why it matters:</strong> Provides an intuitive visual representation of the Prior Probabilities in Bayes' Theorem.</p>
+                </div>
+                <div class="chart-wrapper">
+                    <h3>Feature Variance (Sample Histogram)</h3>
+                    <canvas id="edaFeatureChart"></canvas>
+                    <p class="chart-explanation"><strong>What this shows:</strong> The distribution of a specific feature's values.<br><br><strong>Why it matters:</strong> Shows the variance spread. Gaussian Naive Bayes explicitly requires normally distributed continuous features.</p>
+                </div>
+            </div>
+            <p id="chartPlaceholder" class="placeholder-text"><i class="fas fa-chart-pie"></i> Please upload a dataset to generate the visual distributions.</p>
+        </section>
+
+        <!-- Section 5: Model Training -->
+        <section id="training" class="card fade-in">
+            <h2><i class="fas fa-cogs icon-heading"></i> 5. Model Training Configuration</h2>
+            
+            <div class="edu-layer">
+                <p><i class="fas fa-question-circle"></i> <strong>What is Train-Test Split?</strong> Dividing data into a "learning" set and a "testing" set.</p>
+                <p><i class="fas fa-question-circle"></i> <strong>What is Cross-Validation?</strong> Splitting the data into K equal chunks and training the model K times, rotating the test chunk each time.</p>
+                <p><i class="fas fa-lightbulb"></i> <strong>Why is this important?</strong> It ensures the model hasn't just "memorized" the answers, proving it can generalize to completely new, unseen data.</p>
+            </div>
+            
+            <div class="training-controls">
+                <div class="slider-group">
+                    <label for="splitSlider">Train-Test Split: <span id="splitValue" class="text-primary">80% Train / 20% Test</span></label>
+                    <input type="range" id="splitSlider" min="50" max="90" value="80" step="10" class="slider">
+                </div>
+                <div class="slider-group">
+                    <label for="cvInput">Cross-Validation Folds (K):</label>
+                    <select id="cvInput" class="form-control" style="width: 100%;">
+                        <option value="3">K = 3</option>
+                        <option value="5" selected>K = 5</option>
+                        <option value="10">K = 10</option>
+                    </select>
+                </div>
+                <button id="trainBtn" class="btn primary-btn"><i class="fas fa-play"></i> Train Model</button>
+            </div>
+
+            <div id="trainingProgress" class="progress-container" style="display: none;">
+                <p>Executing K-Fold Cross Validation and Calculating Likelihoods...</p>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+
+            <div id="trainingSummary" class="training-summary" style="display: none;">
+                <h3><i class="fas fa-clipboard-check"></i> Training Summary Dashboard</h3>
+                <div class="summary-grid">
+                    <div class="summary-box">
+                        <h4>Calculated Priors P(Y)</h4>
+                        <table class="styled-table mini-table">
+                            <thead><tr><th>Class</th><th>Probability</th></tr></thead>
+                            <tbody>
+                                <tr><td>Yes</td><td>0.643</td></tr>
+                                <tr><td>No</td><td>0.357</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="summary-box">
+                        <h4>Mock Likelihoods P(Rain|Y)</h4>
+                        <table class="styled-table mini-table">
+                            <thead><tr><th>Class</th><th>P(Rain|Class)</th></tr></thead>
+                            <tbody>
+                                <tr><td>Yes</td><td>0.333</td></tr>
+                                <tr><td>No</td><td>0.400</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="summary-box">
+                        <h4>Cross-Validation Result</h4>
+                        <p style="margin-bottom:0.5rem;"><strong>Folds (K):</strong> <span id="cvSummaryK">5</span></p>
+                        <p style="margin-bottom:0.5rem; font-size:1.1rem;"><strong>Mean Accuracy:</strong> <span style="color:#16a34a; font-weight:bold;">85.4%</span></p>
+                        <p class="text-muted" style="font-size:0.85rem; line-height: 1.4;"><i class="fas fa-shield-alt"></i> Validates model robustness across <span id="cvSummaryText">5</span> random data splits.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: The Algorithm -->
+        <section id="algorithm" class="card fade-in">
+            <h2><i class="fas fa-calculator icon-heading"></i> 6. Algorithmic Foundation</h2>
+            
+            <div class="edu-layer">
+                <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> The core mathematical formula driving the decision engine.</p>
+                <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> Understanding the formula allows us to trace exactly how the model weighs past evidence to make future predictions, moving from a "black box" to transparency.</p>
+            </div>
+
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <div class="flow-icon"><i class="fas fa-database"></i></div>
+                    <div class="flow-text">1. Evidence (X)</div>
+                </div>
+                <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="flow-step">
+                    <div class="flow-icon"><i class="fas fa-chart-pie"></i></div>
+                    <div class="flow-text">2. Prior Probability</div>
+                </div>
+                <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="flow-step">
+                    <div class="flow-icon"><i class="fas fa-filter"></i></div>
+                    <div class="flow-text">3. Likelihoods</div>
+                </div>
+                <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="flow-step highlight-step">
+                    <div class="flow-icon"><i class="fas fa-balance-scale"></i></div>
+                    <div class="flow-text">4. Posterior Probability</div>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <h4>Bayes' Theorem:</h4>
+                \[ P(Y|X) = \frac{P(X|Y) \cdot P(Y)}{P(X)} \]
+            </div>
+
+            <div class="definitions-list">
+                <div class="def-item">
+                    <h4>Prior Probability \( P(Y) \)</h4>
+                    <p>The initial degree of belief regarding the prevalence of class \(Y\) before evaluating any feature evidence. Computed as the frequency of class \(Y\) in the training set.</p>
+                </div>
+                <div class="def-item">
+                    <h4>Likelihood \( P(X|Y) \)</h4>
+                    <p>The conditional probability of observing the specific feature set \(X\) assuming that class \(Y\) is the true outcome. It quantifies how well the evidence supports the class.</p>
+                </div>
+                <div class="def-item">
+                    <h4>Marginal Likelihood (Evidence) \( P(X) \)</h4>
+                    <p>The total probability of observing the features across all possible classes. Acts as a constant scaling factor.</p>
+                </div>
+                <div class="def-item">
+                    <h4>Posterior Probability \( P(Y|X) \)</h4>
+                    <p>The refined probability of the class \(Y\) after incorporating the feature evidence \(X\). The classifier predicts the class yielding the highest posterior.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Example -->
+        <section id="example" class="card fade-in">
+            <h2><i class="fas fa-list-ol icon-heading"></i> 7. Step-by-Step Numerical Example</h2>
+            
+            <div class="edu-layer">
+                <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> A full manual calculation of the Naive Bayes algorithm.</p>
+                <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> It proves how the mathematical formula in Section 6 is practically applied to real numbers to generate a prediction.</p>
+            </div>
+
+            <div class="formula-box" style="margin-top:0;">
+                <h4>Fundamental Formula Applied:</h4>
+                \[ P(\text{Class} | \text{Data}) \propto P(\text{Class}) \times P(\text{feature}_1 | \text{Class}) \times \dots \times P(\text{feature}_n | \text{Class}) \]
+            </div>
+
+            <div class="content-block">
+                <p><strong>Scenario:</strong> Utilizing a historical meteorological dataset, we aim to predict a binary outcome: whether to <strong>Play Golf (Yes/No)</strong> given today's atmospheric conditions: <strong>Outlook = Rain, Humidity = High, Wind = Strong</strong>.</p>
+            </div>
+            
+            <div class="example-grid">
+                <div class="step-box">
+                    <h3>Step I: Computation of Priors</h3>
+                    <p>From an empirical sample of 14 observations, golf was played 9 times and canceled 5 times.</p>
+                    <div class="math-block">
+                        <p>\(P(\text{Yes}) = \frac{9}{14} \approx 0.643\)</p>
+                        <p>\(P(\text{No}) = \frac{5}{14} \approx 0.357\)</p>
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <h3>Step II: Computation of Conditional Likelihoods</h3>
+                    <p>Evaluating feature probabilities conditioned on each class:</p>
+                    <div class="likelihoods-grid">
+                        <div>
+                            <strong>Conditioned on 'Yes':</strong>
+                            <ul>
+                                <li>\(P(\text{Rain}|\text{Yes}) = 3/9 \approx 0.333\)</li>
+                                <li>\(P(\text{High Hum.}|\text{Yes}) = 3/9 \approx 0.333\)</li>
+                                <li>\(P(\text{Strong Wind}|\text{Yes}) = 3/9 \approx 0.333\)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong>Conditioned on 'No':</strong>
+                            <ul>
+                                <li>\(P(\text{Rain}|\text{No}) = 2/5 = 0.400\)</li>
+                                <li>\(P(\text{High Hum.}|\text{No}) = 4/5 = 0.800\)</li>
+                                <li>\(P(\text{Strong Wind}|\text{No}) = 3/5 = 0.600\)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-box highlight-step-card">
+                    <h3>Step III: Posterior Proportionality &amp; Final Result</h3>
+                    <p>Multiplying the Prior by the product of Likelihoods (omitting the denominator):</p>
+                    <div class="math-block">
+                        <p><strong>Proportional Posterior for YES:</strong><br>
+                        \(0.643 \times 0.333 \times 0.333 \times 0.333 \approx \mathbf{0.0237}\)</p>
+                        <p><strong>Proportional Posterior for NO:</strong><br>
+                        \(0.357 \times 0.400 \times 0.800 \times 0.600 \approx \mathbf{0.0685}\)</p>
+                    </div>
+                    
+                    <div class="conclusion-box">
+                        <p><strong>Final Result:</strong> Since \(0.0685 > 0.0237\), the Maximum A Posteriori (MAP) estimate is <strong>NO</strong>. The formal recommendation is to abstain from playing golf.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: Variants & Implementation -->
+        <section id="variants" class="card fade-in">
+            <h2><i class="fas fa-project-diagram icon-heading"></i> 8. Naive Bayes Types &amp; Implementation</h2>
+            
+            <div class="edu-layer">
+                <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> Different "flavors" of the algorithm and how to code them.</p>
+                <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> A text-classification task requires a different mathematical approach than a numeric medical diagnosis task.</p>
+            </div>
+
+            <div class="tabs-container">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-target="theory-tab">Theory</button>
+                    <button class="tab-btn" data-target="code-tab">Python Code</button>
+                </div>
+                
+                <div class="tab-content active" id="theory-tab">
+                    <div class="content-block">
+                        <p>The statistical nature of the features dictates the specific distributional assumption (variant) required for the Naive Bayes classifier:</p>
+                    </div>
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Distribution Model</th>
+                                <th>Applicability &amp; Assumption</th>
+                                <th>Prototypical Use Case</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Gaussian Naive Bayes</strong></td>
+                                <td>Designed for continuous, numerical features. Assumes the likelihood of features follows a Gaussian (normal) distribution.</td>
+                                <td>Predicting continuous biological metrics (e.g., blood pressure, height).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Multinomial Naive Bayes</strong></td>
+                                <td>Optimized for discrete quantitative data representing frequencies or occurrence counts.</td>
+                                <td>Document categorization based on term frequency matrices.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bernoulli Naive Bayes</strong></td>
+                                <td>Tailored for multivariate Bernoulli distributions; features represent independent boolean (binary) variables.</td>
+                                <td>Spam identification using binary presence/absence indicators of specific vocabulary.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tab-content" id="code-tab">
+                    <div class="content-block">
+                        <p>Real-world implementation using Python and the scikit-learn machine learning library:</p>
+                    </div>
+                    <div class="code-block-wrapper">
+                        <h3>Gaussian Naive Bayes (Continuous Data)</h3>
+<pre><code class="language-python">import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score
+
+# 1. Load dataset
+df = pd.read_csv('data.csv')
+X = df.drop('target', axis=1)
+y = df['target']
+
+# 2. Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 3. Initialize and Train Model
+model = GaussianNB()
+model.fit(X_train, y_train)
+
+# 4. Predict and Evaluate
+predictions = model.predict(X_test)
+print(f"Accuracy: {accuracy_score(y_test, predictions):.2f}")</code></pre>
+                    </div>
+                    
+                    <div class="code-block-wrapper">
+                        <h3>Multinomial Naive Bayes (Text/Count Data)</h3>
+<pre><code class="language-python">from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import make_pipeline
+
+# 1. Sample text data and labels
+texts = ["win free cash", "meeting at noon", "free lottery", "urgent review"]
+labels = ["spam", "ham", "spam", "ham"]
+
+# 2. Create a pipeline (Vectorization + Naive Bayes)
+model = make_pipeline(CountVectorizer(), MultinomialNB())
+
+# 3. Train Model
+model.fit(texts, labels)
+
+# 4. Predict new data
+new_email = ["claim your free prize"]
+print("Prediction:", model.predict(new_email))</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9: Prediction -->
+        <section id="prediction" class="card fade-in">
+            <h2><i class="fas fa-magic icon-heading"></i> 9. Interactive Predictive Modeling</h2>
+            
+            <div class="edu-layer">
+                <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> A live, interactive demo of the algorithm.</p>
+                <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> It solidifies understanding by letting you change variables and instantly see the mathematical outcome.</p>
+            </div>
+
+            <div class="content-block">
+                <p><strong>Experimentation:</strong> Specify hypothetical atmospheric parameters using the interface below. The engine will dynamically compute the posterior probabilities applying the methodology detailed in Section 7.</p>
+                <p class="formula-inline"><strong>Formula applied:</strong> \( \text{Score} = P(\text{Class}) \times P(\text{Outlook}|\text{Class}) \times P(\text{Humidity}|\text{Class}) \times P(\text{Wind}|\text{Class}) \)</p>
+            </div>
+            
+            <div class="prediction-form">
+                <div class="form-group">
+                    <label for="inputOutlook">Outlook Condition</label>
+                    <select id="inputOutlook" class="form-control">
+                        <option value="Sunny">Sunny</option>
+                        <option value="Overcast">Overcast</option>
+                        <option value="Rain">Rain</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="inputHumidity">Humidity Level</label>
+                    <select id="inputHumidity" class="form-control">
+                        <option value="High">High</option>
+                        <option value="Normal">Normal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="inputWind">Wind Intensity</label>
+                    <select id="inputWind" class="form-control">
+                        <option value="Weak">Weak</option>
+                        <option value="Strong">Strong</option>
+                    </select>
+                </div>
+                <button id="predictBtn" class="btn"><i class="fas fa-cogs"></i> Execute Prediction</button>
+            </div>
+
+            <div id="predictionResult" class="result-box" style="display: none;">
+                <h3><i class="fas fa-poll"></i> Step-by-Step Calculation</h3>
+                
+                <div class="calc-steps">
+                    <div class="calc-step">
+                        <h4>1. Calculate Score for YES</h4>
+                        <div class="math-block" id="calcYesText"></div>
+                    </div>
+                    <div class="calc-step">
+                        <h4>2. Calculate Score for NO</h4>
+                        <div class="math-block" id="calcNoText"></div>
+                    </div>
+                </div>
+
+                <div class="final-verdict-box">
+                    <h4>3. Final Prediction</h4>
+                    <h2 id="finalVerdict" class="verdict-heading"></h2>
+                    <p id="verdictExplanation"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 10: Evaluation -->
+        <section id="evaluation" class="card fade-in">
+            <h2><i class="fas fa-check-double icon-heading"></i> 10. Model Evaluation Metrics</h2>
+            
+            <div class="edu-layer">
+                <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> Standardized formulas used to judge how well a model performs.</p>
+                <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> Accuracy alone is misleading. These metrics give a comprehensive view of the model's strengths and weaknesses.</p>
+            </div>
+
+            <div class="content-block">
+                <p><strong>Definition:</strong> Post-training performance quantification is imperative. Metrics are derived from the Confusion Matrix, which cross-tabulates predicted classifications against empirical truths (True Positives, True Negatives, False Positives, False Negatives).</p>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h4><i class="fas fa-bullseye icon-metric"></i> Accuracy</h4>
+                    <p class="metric-def">The ratio of correctly predicted observations to the total observations.</p>
+                    <div class="metric-formula">\[ \frac{TP + TN}{Total} \]</div>
+                    <p class="metric-interp"><em>Interpretation:</em> General effectiveness. Can be misleading if classes are highly imbalanced.</p>
+                </div>
+                <div class="metric-card">
+                    <h4><i class="fas fa-compress-arrows-alt icon-metric"></i> Precision</h4>
+                    <p class="metric-def">The proportion of positive identifications that were actually correct.</p>
+                    <div class="metric-formula">\[ \frac{TP}{TP + FP} \]</div>
+                    <p class="metric-interp"><em>Interpretation:</em> Crucial when the cost of a False Positive is high (e.g., spam filtering).</p>
+                </div>
+                <div class="metric-card">
+                    <h4><i class="fas fa-search icon-metric"></i> Recall (Sensitivity)</h4>
+                    <p class="metric-def">The proportion of actual positives that were correctly identified.</p>
+                    <div class="metric-formula">\[ \frac{TP}{TP + FN} \]</div>
+                    <p class="metric-interp"><em>Interpretation:</em> Critical when the cost of a False Negative is high (e.g., medical diagnosis).</p>
+                </div>
+                <div class="metric-card">
+                    <h4><i class="fas fa-balance-scale icon-metric"></i> F1-Score</h4>
+                    <p class="metric-def">The harmonic mean of Precision and Recall, providing a single balanced metric.</p>
+                    <div class="metric-formula">\[ 2 \times \frac{Precision \times Recall}{Precision + Recall} \]</div>
+                    <p class="metric-interp"><em>Interpretation:</em> The preferred metric when dealing with uneven class distributions.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="main-footer">
+            <div class="footer-content">
+                <h3>Naive Bayes Educational Dashboard</h3>
+                <p class="student-info">Developed by: <strong>[MOHAMMAD DANISH]</strong> | Course: <strong>[MACHINE LEARNING /AM-404]</strong> | Institution: <strong>[DR.B.C.ROY ENGINEERING COLLEGE]</strong></p>
+                <p class="disclaimer">Designed for academic and educational demonstrations.</p>
+            </div>
+        </footer>
+
+    </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
 
