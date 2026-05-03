@@ -4,751 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naive Bayes Educational Dashboard</title>
-    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%232980b9' d='M416 176c0-35.3-28.7-64-64-64s-64 28.7-64 64c0 14.5 4.8 27.9 13 38.6l-98 81.7c-9.3-5.3-20-8.3-31-8.3c-35.3 0-64 28.7-64 64s28.7 64 64 64s64-28.7 64-64c0-6.7-1-13-3-19.1l102.2-74c10 8.5 23 13.1 36.8 13.1c35.3 0 64-28.7 64-64s-28.7-64-64-64zm0 96c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32zM172 352c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32zm180-64c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z'/></svg>">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- PapaParse for CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- Chart.js for EDA -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- MathJax for Formulas -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <style>
-        /* ========== GLOBAL STYLES ========== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
-            color: #2c3e50;
-            line-height: 1.6;
-        }
-
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* ========== SIDEBAR STYLES ========== */
-        .sidebar {
-            width: 300px;
-            background: linear-gradient(180deg, #1a252f 0%, #0f1a24 100%);
-            color: #ecf0f1;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 100;
-            transition: all 0.3s ease;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-        }
-
-        .sidebar h2 {
-            text-align: center;
-            padding: 1.5rem 1rem;
-            font-size: 1.4rem;
-            border-bottom: 1px solid #2c3e50;
-            margin-bottom: 1rem;
-            background: rgba(255,255,255,0.05);
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        .sidebar ul {
-            list-style: none;
-            padding: 0 0.5rem;
-        }
-
-        .sidebar ul li a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            color: #bdc3c7;
-            text-decoration: none;
-            font-size: 0.95rem;
-            border-radius: 12px;
-            margin-bottom: 4px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .sidebar ul li a:hover {
-            background: rgba(52, 152, 219, 0.2);
-            color: white;
-            transform: translateX(5px);
-        }
-
-        .sidebar ul li a.active {
-            background: linear-gradient(90deg, #2980b9, #3498db);
-            color: white;
-            box-shadow: 0 2px 8px rgba(41,128,185,0.3);
-        }
-
-        .sidebar ul li a.completed {
-            color: #2ecc71;
-        }
-
-        .sidebar ul li a.completed .check-icon {
-            opacity: 1;
-        }
-
-        .nav-icon {
-            width: 24px;
-            font-size: 1.1rem;
-        }
-
-        .check-icon {
-            margin-left: auto;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.9rem;
-        }
-
-        .sidebar ul li a.completed .check-icon {
-            opacity: 1;
-            color: #2ecc71;
-        }
-
-        .progress-reset {
-            padding: 1.5rem;
-            margin-top: 1rem;
-            border-top: 1px solid #2c3e50;
-        }
-
-        /* Scrollbar */
-        .sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .sidebar::-webkit-scrollbar-track {
-            background: #1a252f;
-        }
-        .sidebar::-webkit-scrollbar-thumb {
-            background: #3498db;
-            border-radius: 10px;
-        }
-
-        /* ========== MAIN CONTENT ========== */
-        .content {
-            flex: 1;
-            margin-left: 300px;
-            padding: 2rem;
-            max-width: calc(100% - 300px);
-        }
-
-        .main-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-            padding: 2rem;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
-
-        .main-header h1 {
-            font-size: 2.2rem;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: #7f8c8d;
-            font-size: 1.1rem;
-        }
-
-        /* ========== CARD STYLES ========== */
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .card:hover {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .card h2 {
-            font-size: 1.6rem;
-            margin-bottom: 1.2rem;
-            color: #2c3e50;
-            border-left: 5px solid #3498db;
-            padding-left: 1rem;
-        }
-
-        .icon-heading {
-            margin-right: 10px;
-            color: #3498db;
-        }
-
-        /* Edu Layer */
-        .edu-layer {
-            background: linear-gradient(135deg, #e8f4fd 0%, #d6ecfa 100%);
-            padding: 1.2rem;
-            border-radius: 16px;
-            margin-bottom: 1.5rem;
-            border-left: 4px solid #3498db;
-        }
-
-        .edu-layer p {
-            margin: 8px 0;
-            font-size: 0.95rem;
-        }
-
-        .edu-layer i {
-            color: #3498db;
-            width: 28px;
-        }
-
-        .content-block {
-            margin-bottom: 1.5rem;
-        }
-
-        .content-block p {
-            margin-bottom: 0.8rem;
-            color: #34495e;
-        }
-
-        /* Split Content */
-        .split-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .content-box {
-            background: #f8f9fa;
-            padding: 1.2rem;
-            border-radius: 16px;
-        }
-
-        .content-box h3 {
-            margin-bottom: 1rem;
-            color: #2c3e50;
-        }
-
-        /* Tables */
-        .demo-tables {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .table-mini {
-            background: white;
-            padding: 0.8rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .table-mini table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table-mini th, .table-mini td {
-            padding: 6px 12px;
-            border: 1px solid #e0e0e0;
-            text-align: center;
-        }
-
-        /* Upload Area */
-        .upload-area {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-            margin: 1.5rem 0;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52,152,219,0.3);
-        }
-
-        .secondary-btn {
-            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
-        }
-
-        .primary-btn {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-        }
-
-        .table-container {
-            margin-top: 1.5rem;
-            overflow-x: auto;
-        }
-
-        .table-container table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .table-container th, .table-container td {
-            padding: 10px;
-            border: 1px solid #e0e0e0;
-            text-align: left;
-        }
-
-        .table-container th {
-            background: #3498db;
-            color: white;
-        }
-
-        /* Charts Grid */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .chart-wrapper {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 16px;
-        }
-
-        .chart-wrapper canvas {
-            max-height: 250px;
-        }
-
-        .chart-explanation {
-            margin-top: 0.8rem;
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            background: white;
-            padding: 0.8rem;
-            border-radius: 10px;
-        }
-
-        .placeholder-text {
-            text-align: center;
-            padding: 3rem;
-            color: #95a5a6;
-            background: #f8f9fa;
-            border-radius: 16px;
-        }
-
-        /* Training Controls */
-        .training-controls {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            margin-bottom: 1.5rem;
-        }
-
-        .slider-group {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .slider {
-            width: 100%;
-            height: 6px;
-            border-radius: 5px;
-            background: #ddd;
-            outline: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #3498db;
-            cursor: pointer;
-        }
-
-        .progress-container {
-            margin: 1rem 0;
-        }
-
-        .progress-bar {
-            height: 10px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 0.5rem 0;
-        }
-
-        .progress-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-            transition: width 0.3s;
-        }
-
-        .training-summary {
-            margin-top: 1.5rem;
-            background: #f8f9fa;
-            padding: 1.2rem;
-            border-radius: 16px;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .summary-box {
-            background: white;
-            padding: 1rem;
-            border-radius: 12px;
-        }
-
-        .styled-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .styled-table th, .styled-table td {
-            padding: 6px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        /* Flow Diagram */
-        .flow-diagram {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 1.5rem 0;
-        }
-
-        .flow-step {
-            background: #f0f4f8;
-            padding: 0.8rem 1.2rem;
-            border-radius: 40px;
-            text-align: center;
-            min-width: 120px;
-        }
-
-        .flow-step.highlight-step {
-            background: #3498db;
-            color: white;
-        }
-
-        .flow-arrow {
-            font-size: 1.5rem;
-            color: #3498db;
-        }
-
-        /* Formula Box */
-        .formula-box {
-            background: #2c3e50;
-            color: white;
-            padding: 1.2rem;
-            border-radius: 16px;
-            text-align: center;
-            margin: 1rem 0;
-        }
-
-        .formula-box h4 {
-            margin-bottom: 0.5rem;
-        }
-
-        /* Definitions */
-        .definitions-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .def-item {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 12px;
-            border-left: 3px solid #3498db;
-        }
-
-        /* Example Grid */
-        .example-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.2rem;
-            margin-top: 1rem;
-        }
-
-        .step-box {
-            background: #f8f9fa;
-            padding: 1.2rem;
-            border-radius: 16px;
-        }
-
-        .highlight-step-card {
-            background: linear-gradient(135deg, #e8f4fd, #d6ecfa);
-            border: 2px solid #3498db;
-        }
-
-        .math-block {
-            background: #2c3e50;
-            color: #e8e8e8;
-            padding: 0.8rem;
-            border-radius: 10px;
-            margin: 0.8rem 0;
-            font-family: monospace;
-            overflow-x: auto;
-        }
-
-        .likelihoods-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.8rem;
-            margin-top: 0.8rem;
-        }
-
-        .conclusion-box {
-            background: #27ae60;
-            color: white;
-            padding: 1rem;
-            border-radius: 12px;
-            margin-top: 1rem;
-            text-align: center;
-        }
-
-        /* Tabs */
-        .tabs-container {
-            margin-top: 1rem;
-        }
-
-        .tabs-header {
-            display: flex;
-            gap: 0.5rem;
-            border-bottom: 2px solid #e0e0e0;
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-weight: 600;
-            color: #7f8c8d;
-            transition: all 0.3s;
-        }
-
-        .tab-btn.active {
-            color: #3498db;
-            border-bottom: 2px solid #3498db;
-        }
-
-        .tab-content {
-            display: none;
-            padding: 1rem 0;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .code-block-wrapper {
-            background: #1e1e1e;
-            border-radius: 12px;
-            padding: 1rem;
-            margin: 1rem 0;
-            overflow-x: auto;
-        }
-
-        .code-block-wrapper h3 {
-            color: #d4d4d4;
-            margin-bottom: 0.8rem;
-        }
-
-        .code-block-wrapper pre {
-            color: #d4d4d4;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-        }
-
-        /* Prediction Form */
-        .prediction-form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        .form-group {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.4rem;
-            font-weight: 600;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            font-size: 0.9rem;
-        }
-
-        .result-box {
-            margin-top: 1.5rem;
-            background: #f8f9fa;
-            padding: 1.2rem;
-            border-radius: 16px;
-        }
-
-        .calc-steps {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-
-        .calc-step {
-            background: white;
-            padding: 1rem;
-            border-radius: 12px;
-        }
-
-        .final-verdict-box {
-            text-align: center;
-            padding: 1rem;
-            border-radius: 16px;
-            margin-top: 1rem;
-            transition: all 0.3s;
-        }
-
-        .verdict-heading {
-            font-size: 1.8rem;
-            margin: 0.5rem 0;
-        }
-
-        /* Metrics Grid */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .metric-card {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 16px;
-            text-align: center;
-        }
-
-        .metric-formula {
-            background: #2c3e50;
-            color: white;
-            padding: 0.5rem;
-            border-radius: 8px;
-            margin: 0.8rem 0;
-            font-size: 0.9rem;
-        }
-
-        .metric-interp {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            margin-top: 0.5rem;
-        }
-
-        /* Footer */
-        .main-footer {
-            background: #1a252f;
-            color: #bdc3c7;
-            text-align: center;
-            padding: 2rem;
-            border-radius: 20px;
-            margin-top: 1rem;
-        }
-
-        .main-footer h3 {
-            color: white;
-            margin-bottom: 0.5rem;
-        }
-
-        .student-info {
-            margin: 0.5rem 0;
-        }
-
-        .disclaimer {
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 250px;
-                transform: translateX(-100%);
-            }
-            .content {
-                margin-left: 0;
-                max-width: 100%;
-            }
-            .split-content {
-                grid-template-columns: 1fr;
-            }
-            .calc-steps {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .text-primary {
-            color: #3498db;
-            font-weight: bold;
-        }
-
-        .text-muted {
-            color: #95a5a6;
-        }
-
-        input[type="file"] {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            background: white;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="dashboard-container">
-    <!-- Sidebar Navigation -->
     <nav class="sidebar">
         <h2>Naive Bayes Dashboard</h2>
         <ul id="sidebarMenu">
@@ -768,7 +35,6 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="content">
         
         <header class="main-header fade-in">
@@ -776,63 +42,48 @@
             <p class="subtitle">An Interactive Educational Dashboard for Probabilistic Machine Learning</p>
         </header>
 
-        <!-- Section 1: Intro -->
         <section id="intro" class="card fade-in">
             <h2><i class="fas fa-book-open icon-heading"></i> 1. Introduction to Naive Bayes</h2>
-            
             <div class="edu-layer">
                 <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> A beginner-friendly introduction to a classic machine learning algorithm based on probability.</p>
                 <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> Understanding the core assumption helps you know exactly when to use (and not use) this powerful model.</p>
             </div>
-
             <div class="content-block">
                 <p><strong>Definition:</strong> The Naive Bayes classifier is a supervised machine learning algorithm based on Bayes' Theorem. It is fundamentally a probabilistic model that assigns class labels to instances by computing the conditional probability of each class given the observed features.</p>
                 <p><strong>The "Naive" Assumption:</strong> The algorithm is termed "naive" because it imposes an assumption of strong conditional independence between the features. This implies that the presence of a particular feature is entirely unrelated to any other feature. Although this is rarely true in reality, the classifier remains incredibly effective in areas like spam detection and medical diagnosis.</p>
             </div>
         </section>
 
-        <!-- Section 2: Data Upload -->
         <section id="upload" class="card fade-in">
             <h2><i class="fas fa-file-csv icon-heading"></i> 2. Data Upload &amp; Preview</h2>
-
             <div class="edu-layer">
                 <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> The ingestion step where raw data (like a spreadsheet) is loaded into the system.</p>
                 <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> Machine learning cannot happen without data. Previewing it ensures it has been parsed correctly.</p>
             </div>
-
             <div class="content-block">
                 <p><strong>Overview:</strong> Empirical analysis relies on structured data. Upload a dataset in Comma-Separated Values (CSV) format to begin.</p>
                 <p>If the dataset includes a categorical target variable as its rightmost column, it will be automatically utilized in the Exploratory Data Analysis (EDA) module.</p>
             </div>
-            
             <div class="upload-area">
                 <input type="file" id="csvFileInput" accept=".csv" />
                 <button id="uploadBtn" class="btn"><i class="fas fa-upload"></i> Load Dataset</button>
             </div>
-            
             <div id="tableContainer" class="table-container" style="display: none;">
                 <h3>Dataset Preview (Top 5 Records)</h3>
-                <table id="csvTable">
-                    <thead></thead>
-                    <tbody></tbody>
-                </table>
+                <table id="csvTable"><thead></thead><tbody></tbody></table>
             </div>
         </section>
 
-        <!-- Section 3: Preprocessing -->
         <section id="preprocessing" class="card fade-in">
             <h2><i class="fas fa-tools icon-heading"></i> 3. Data Preprocessing</h2>
-            
             <div class="edu-layer">
                 <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> Cleaning up the dataset to fix missing holes and converting text into numbers.</p>
                 <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> Algorithms are mathematical models; they crash if you feed them missing values or raw text strings.</p>
             </div>
-            
             <div class="split-content">
                 <div class="content-box">
                     <h3><i class="fas fa-eraser"></i> Handling Missing Values</h3>
                     <p><strong>Concept:</strong> Datasets frequently contain omissions (NaNs) due to human error.</p>
-                    
                     <div class="interactive-demo">
                         <label><strong>Try a Strategy:</strong></label>
                         <select id="missingStrategy" class="form-control">
@@ -841,34 +92,21 @@
                             <option value="drop">Drop Rows</option>
                         </select>
                         <button id="applyMissingBtn" class="btn secondary-btn" style="margin-top:10px; padding: 0.5rem 1rem;">Apply Fix</button>
-                        
                         <div class="demo-tables">
                             <div class="table-mini">
                                 <strong>Before:</strong>
-                                <table>
-                                    <tr><th>Age</th></tr>
-                                    <tr><td>25</td></tr>
-                                    <tr><td style="color:#e74c3c; font-weight:bold;">NaN</td></tr>
-                                    <tr><td>35</td></tr>
-                                </table>
+                                <table><tr><th>Age</th></tr><tr><td>25</td></tr><tr><td style="color:#e74c3c; font-weight:bold;">NaN</td></tr><tr><td>35</td></tr></table>
                             </div>
                             <div class="table-mini">
                                 <strong>After:</strong>
-                                <table id="missingResultTable">
-                                    <tr><th>Age</th></tr>
-                                    <tr><td>25</td></tr>
-                                    <tr><td style="color:#16a34a; font-weight:bold;">30 (Mean)</td></tr>
-                                    <tr><td>35</td></tr>
-                                </table>
+                                <table id="missingResultTable"><tr><th>Age</th></tr><tr><td>25</td></tr><tr><td style="color:#16a34a; font-weight:bold;">30 (Mean)</td></tr><tr><td>35</td></tr></table>
                             </div>
                         </div>
                     </div>
                 </div>
-                
                 <div class="content-box">
                     <h3><i class="fas fa-font"></i> Encoding Categorical Data</h3>
                     <p><strong>Concept:</strong> Converting qualitative text variables (like colors or cities) into numerical representations.</p>
-                    
                     <div class="interactive-demo">
                         <label><strong>Try an Encoding:</strong></label>
                         <select id="encodingStrategy" class="form-control">
@@ -876,23 +114,14 @@
                             <option value="onehot">One-Hot Encoding (Binary Columns)</option>
                         </select>
                         <button id="applyEncodingBtn" class="btn secondary-btn" style="margin-top:10px; padding: 0.5rem 1rem;">Apply Encoding</button>
-                        
                         <div class="demo-tables">
                             <div class="table-mini">
                                 <strong>Before:</strong>
-                                <table>
-                                    <tr><th>Color</th></tr>
-                                    <tr><td>Red</td></tr>
-                                    <tr><td>Blue</td></tr>
-                                </table>
+                                <table><tr><th>Color</th></tr><tr><td>Red</td></tr><tr><td>Blue</td></tr></table>
                             </div>
                             <div class="table-mini">
                                 <strong>After:</strong>
-                                <table id="encodingResultTable">
-                                    <tr><th>Color</th></tr>
-                                    <tr><td style="color:#16a34a; font-weight:bold;">0</td></tr>
-                                    <tr><td style="color:#16a34a; font-weight:bold;">1</td></tr>
-                                </table>
+                                <table id="encodingResultTable"><tr><th>Color</th></tr><tr><td style="color:#16a34a; font-weight:bold;">0</td></tr><tr><td style="color:#16a34a; font-weight:bold;">1</td></tr></table>
                             </div>
                         </div>
                     </div>
@@ -900,15 +129,12 @@
             </div>
         </section>
 
-        <!-- Section 4: EDA -->
         <section id="eda" class="card fade-in">
             <h2><i class="fas fa-chart-bar icon-heading"></i> 4. Exploratory Data Analysis (EDA)</h2>
-            
             <div class="edu-layer">
                 <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> Using graphs and visual charts to understand the patterns in the data before building the model.</p>
                 <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> It helps spot imbalances. If 90% of your data is 'Yes', the model will blindly predict 'Yes' to cheat at high accuracy.</p>
             </div>
-            
             <div class="charts-grid" id="edaChartsGrid" style="display: none;">
                 <div class="chart-wrapper">
                     <h3>Class Distribution (Bar)</h3>
@@ -929,16 +155,13 @@
             <p id="chartPlaceholder" class="placeholder-text"><i class="fas fa-chart-pie"></i> Please upload a dataset to generate the visual distributions.</p>
         </section>
 
-        <!-- Section 5: Model Training -->
         <section id="training" class="card fade-in">
             <h2><i class="fas fa-cogs icon-heading"></i> 5. Model Training Configuration</h2>
-            
             <div class="edu-layer">
                 <p><i class="fas fa-question-circle"></i> <strong>What is Train-Test Split?</strong> Dividing data into a "learning" set and a "testing" set.</p>
                 <p><i class="fas fa-question-circle"></i> <strong>What is Cross-Validation?</strong> Splitting the data into K equal chunks and training the model K times, rotating the test chunk each time.</p>
                 <p><i class="fas fa-lightbulb"></i> <strong>Why is this important?</strong> It ensures the model hasn't just "memorized" the answers, proving it can generalize to completely new, unseen data.</p>
             </div>
-            
             <div class="training-controls">
                 <div class="slider-group">
                     <label for="splitSlider">Train-Test Split: <span id="splitValue" class="text-primary">80% Train / 20% Test</span></label>
@@ -954,374 +177,185 @@
                 </div>
                 <button id="trainBtn" class="btn primary-btn"><i class="fas fa-play"></i> Train Model</button>
             </div>
-
             <div id="trainingProgress" class="progress-container" style="display: none;">
                 <p>Executing K-Fold Cross Validation and Calculating Likelihoods...</p>
-                <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                </div>
+                <div class="progress-bar"><div class="progress-fill"></div></div>
             </div>
-
             <div id="trainingSummary" class="training-summary" style="display: none;">
                 <h3><i class="fas fa-clipboard-check"></i> Training Summary Dashboard</h3>
                 <div class="summary-grid">
                     <div class="summary-box">
                         <h4>Calculated Priors P(Y)</h4>
-                        <table class="styled-table mini-table">
-                            <thead><tr><th>Class</th><th>Probability</th></tr></thead>
-                            <tbody>
-                                <tr><td>Yes</td><td>0.643</td></tr>
-                                <tr><td>No</td><td>0.357</td></tr>
-                            </tbody>
-                        </table>
+                        <table class="styled-table mini-table"><thead><tr><th>Class</th><th>Probability</th></tr></thead><tbody><tr><td>Yes</td><td>0.643</td></tr><tr><td>No</td><td>0.357</td></tr></tbody></table>
                     </div>
                     <div class="summary-box">
                         <h4>Mock Likelihoods P(Rain|Y)</h4>
-                        <table class="styled-table mini-table">
-                            <thead><tr><th>Class</th><th>P(Rain|Class)</th></tr></thead>
-                            <tbody>
-                                <tr><td>Yes</td><td>0.333</td></tr>
-                                <tr><td>No</td><td>0.400</td></tr>
-                            </tbody>
-                        </table>
+                        <table class="styled-table mini-table"><thead><tr><th>Class</th><th>P(Rain|Class)</th></tr></thead><tbody><tr><td>Yes</td><td>0.333</td></tr><tr><td>No</td><td>0.400</td></tr></tbody></table>
                     </div>
                     <div class="summary-box">
                         <h4>Cross-Validation Result</h4>
-                        <p style="margin-bottom:0.5rem;"><strong>Folds (K):</strong> <span id="cvSummaryK">5</span></p>
-                        <p style="margin-bottom:0.5rem; font-size:1.1rem;"><strong>Mean Accuracy:</strong> <span style="color:#16a34a; font-weight:bold;">85.4%</span></p>
-                        <p class="text-muted" style="font-size:0.85rem; line-height: 1.4;"><i class="fas fa-shield-alt"></i> Validates model robustness across <span id="cvSummaryText">5</span> random data splits.</p>
+                        <p><strong>Folds (K):</strong> <span id="cvSummaryK">5</span></p>
+                        <p><strong>Mean Accuracy:</strong> <span style="color:#16a34a; font-weight:bold;">85.4%</span></p>
+                        <p><i class="fas fa-shield-alt"></i> Validates model robustness across <span id="cvSummaryText">5</span> random data splits.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Section 6: The Algorithm -->
         <section id="algorithm" class="card fade-in">
             <h2><i class="fas fa-calculator icon-heading"></i> 6. Algorithmic Foundation</h2>
-            
             <div class="edu-layer">
                 <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> The core mathematical formula driving the decision engine.</p>
                 <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> Understanding the formula allows us to trace exactly how the model weighs past evidence to make future predictions, moving from a "black box" to transparency.</p>
             </div>
-
             <div class="flow-diagram">
-                <div class="flow-step">
-                    <div class="flow-icon"><i class="fas fa-database"></i></div>
-                    <div class="flow-text">1. Evidence (X)</div>
-                </div>
+                <div class="flow-step"><div class="flow-icon"><i class="fas fa-database"></i></div><div class="flow-text">1. Evidence (X)</div></div>
                 <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
-                <div class="flow-step">
-                    <div class="flow-icon"><i class="fas fa-chart-pie"></i></div>
-                    <div class="flow-text">2. Prior Probability</div>
-                </div>
+                <div class="flow-step"><div class="flow-icon"><i class="fas fa-chart-pie"></i></div><div class="flow-text">2. Prior Probability</div></div>
                 <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
-                <div class="flow-step">
-                    <div class="flow-icon"><i class="fas fa-filter"></i></div>
-                    <div class="flow-text">3. Likelihoods</div>
-                </div>
+                <div class="flow-step"><div class="flow-icon"><i class="fas fa-filter"></i></div><div class="flow-text">3. Likelihoods</div></div>
                 <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
-                <div class="flow-step highlight-step">
-                    <div class="flow-icon"><i class="fas fa-balance-scale"></i></div>
-                    <div class="flow-text">4. Posterior Probability</div>
-                </div>
+                <div class="flow-step highlight-step"><div class="flow-icon"><i class="fas fa-balance-scale"></i></div><div class="flow-text">4. Posterior Probability</div></div>
             </div>
-
             <div class="formula-box">
                 <h4>Bayes' Theorem:</h4>
                 \[ P(Y|X) = \frac{P(X|Y) \cdot P(Y)}{P(X)} \]
             </div>
-
             <div class="definitions-list">
-                <div class="def-item">
-                    <h4>Prior Probability \( P(Y) \)</h4>
-                    <p>The initial degree of belief regarding the prevalence of class \(Y\) before evaluating any feature evidence. Computed as the frequency of class \(Y\) in the training set.</p>
-                </div>
-                <div class="def-item">
-                    <h4>Likelihood \( P(X|Y) \)</h4>
-                    <p>The conditional probability of observing the specific feature set \(X\) assuming that class \(Y\) is the true outcome. It quantifies how well the evidence supports the class.</p>
-                </div>
-                <div class="def-item">
-                    <h4>Marginal Likelihood (Evidence) \( P(X) \)</h4>
-                    <p>The total probability of observing the features across all possible classes. Acts as a constant scaling factor.</p>
-                </div>
-                <div class="def-item">
-                    <h4>Posterior Probability \( P(Y|X) \)</h4>
-                    <p>The refined probability of the class \(Y\) after incorporating the feature evidence \(X\). The classifier predicts the class yielding the highest posterior.</p>
-                </div>
+                <div class="def-item"><h4>Prior Probability \( P(Y) \)</h4><p>The initial degree of belief regarding the prevalence of class \(Y\) before evaluating any feature evidence. Computed as the frequency of class \(Y\) in the training set.</p></div>
+                <div class="def-item"><h4>Likelihood \( P(X|Y) \)</h4><p>The conditional probability of observing the specific feature set \(X\) assuming that class \(Y\) is the true outcome. It quantifies how well the evidence supports the class.</p></div>
+                <div class="def-item"><h4>Marginal Likelihood (Evidence) \( P(X) \)</h4><p>The total probability of observing the features across all possible classes. Acts as a constant scaling factor.</p></div>
+                <div class="def-item"><h4>Posterior Probability \( P(Y|X) \)</h4><p>The refined probability of the class \(Y\) after incorporating the feature evidence \(X\). The classifier predicts the class yielding the highest posterior.</p></div>
             </div>
         </section>
 
-        <!-- Section 7: Example -->
         <section id="example" class="card fade-in">
             <h2><i class="fas fa-list-ol icon-heading"></i> 7. Step-by-Step Numerical Example</h2>
-            
             <div class="edu-layer">
                 <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> A full manual calculation of the Naive Bayes algorithm.</p>
                 <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> It proves how the mathematical formula in Section 6 is practically applied to real numbers to generate a prediction.</p>
             </div>
-
             <div class="formula-box" style="margin-top:0;">
                 <h4>Fundamental Formula Applied:</h4>
                 \[ P(\text{Class} | \text{Data}) \propto P(\text{Class}) \times P(\text{feature}_1 | \text{Class}) \times \dots \times P(\text{feature}_n | \text{Class}) \]
             </div>
-
             <div class="content-block">
                 <p><strong>Scenario:</strong> Utilizing a historical meteorological dataset, we aim to predict a binary outcome: whether to <strong>Play Golf (Yes/No)</strong> given today's atmospheric conditions: <strong>Outlook = Rain, Humidity = High, Wind = Strong</strong>.</p>
             </div>
-            
             <div class="example-grid">
                 <div class="step-box">
                     <h3>Step I: Computation of Priors</h3>
                     <p>From an empirical sample of 14 observations, golf was played 9 times and canceled 5 times.</p>
-                    <div class="math-block">
-                        <p>\(P(\text{Yes}) = \frac{9}{14} \approx 0.643\)</p>
-                        <p>\(P(\text{No}) = \frac{5}{14} \approx 0.357\)</p>
-                    </div>
+                    <div class="math-block"><p>\(P(\text{Yes}) = \frac{9}{14} \approx 0.643\)</p><p>\(P(\text{No}) = \frac{5}{14} \approx 0.357\)</p></div>
                 </div>
-
                 <div class="step-box">
                     <h3>Step II: Computation of Conditional Likelihoods</h3>
                     <p>Evaluating feature probabilities conditioned on each class:</p>
                     <div class="likelihoods-grid">
-                        <div>
-                            <strong>Conditioned on 'Yes':</strong>
-                            <ul>
-                                <li>\(P(\text{Rain}|\text{Yes}) = 3/9 \approx 0.333\)</li>
-                                <li>\(P(\text{High Hum.}|\text{Yes}) = 3/9 \approx 0.333\)</li>
-                                <li>\(P(\text{Strong Wind}|\text{Yes}) = 3/9 \approx 0.333\)</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <strong>Conditioned on 'No':</strong>
-                            <ul>
-                                <li>\(P(\text{Rain}|\text{No}) = 2/5 = 0.400\)</li>
-                                <li>\(P(\text{High Hum.}|\text{No}) = 4/5 = 0.800\)</li>
-                                <li>\(P(\text{Strong Wind}|\text{No}) = 3/5 = 0.600\)</li>
-                            </ul>
-                        </div>
+                        <div><strong>Conditioned on 'Yes':</strong><ul><li>\(P(\text{Rain}|\text{Yes}) = 3/9 \approx 0.333\)</li><li>\(P(\text{High Hum.}|\text{Yes}) = 3/9 \approx 0.333\)</li><li>\(P(\text{Strong Wind}|\text{Yes}) = 3/9 \approx 0.333\)</li></ul></div>
+                        <div><strong>Conditioned on 'No':</strong><ul><li>\(P(\text{Rain}|\text{No}) = 2/5 = 0.400\)</li><li>\(P(\text{High Hum.}|\text{No}) = 4/5 = 0.800\)</li><li>\(P(\text{Strong Wind}|\text{No}) = 3/5 = 0.600\)</li></ul></div>
                     </div>
                 </div>
-
                 <div class="step-box highlight-step-card">
                     <h3>Step III: Posterior Proportionality &amp; Final Result</h3>
                     <p>Multiplying the Prior by the product of Likelihoods (omitting the denominator):</p>
-                    <div class="math-block">
-                        <p><strong>Proportional Posterior for YES:</strong><br>
-                        \(0.643 \times 0.333 \times 0.333 \times 0.333 \approx \mathbf{0.0237}\)</p>
-                        <p><strong>Proportional Posterior for NO:</strong><br>
-                        \(0.357 \times 0.400 \times 0.800 \times 0.600 \approx \mathbf{0.0685}\)</p>
-                    </div>
-                    
-                    <div class="conclusion-box">
-                        <p><strong>Final Result:</strong> Since \(0.0685 > 0.0237\), the Maximum A Posteriori (MAP) estimate is <strong>NO</strong>. The formal recommendation is to abstain from playing golf.</p>
-                    </div>
+                    <div class="math-block"><p><strong>Proportional Posterior for YES:</strong><br>\(0.643 \times 0.333 \times 0.333 \times 0.333 \approx \mathbf{0.0237}\)</p><p><strong>Proportional Posterior for NO:</strong><br>\(0.357 \times 0.400 \times 0.800 \times 0.600 \approx \mathbf{0.0685}\)</p></div>
+                    <div class="conclusion-box"><p><strong>Final Result:</strong> Since \(0.0685 > 0.0237\), the Maximum A Posteriori (MAP) estimate is <strong>NO</strong>. The formal recommendation is to abstain from playing golf.</p></div>
                 </div>
             </div>
         </section>
 
-        <!-- Section 8: Variants & Implementation -->
         <section id="variants" class="card fade-in">
             <h2><i class="fas fa-project-diagram icon-heading"></i> 8. Naive Bayes Types &amp; Implementation</h2>
-            
             <div class="edu-layer">
                 <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> Different "flavors" of the algorithm and how to code them.</p>
                 <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> A text-classification task requires a different mathematical approach than a numeric medical diagnosis task.</p>
             </div>
-
             <div class="tabs-container">
                 <div class="tabs-header">
                     <button class="tab-btn active" data-target="theory-tab">Theory</button>
                     <button class="tab-btn" data-target="code-tab">Python Code</button>
                 </div>
-                
                 <div class="tab-content active" id="theory-tab">
-                    <div class="content-block">
-                        <p>The statistical nature of the features dictates the specific distributional assumption (variant) required for the Naive Bayes classifier:</p>
-                    </div>
-                    <table class="styled-table">
-                        <thead>
-                            <tr>
-                                <th>Distribution Model</th>
-                                <th>Applicability &amp; Assumption</th>
-                                <th>Prototypical Use Case</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Gaussian Naive Bayes</strong></td>
-                                <td>Designed for continuous, numerical features. Assumes the likelihood of features follows a Gaussian (normal) distribution.</td>
-                                <td>Predicting continuous biological metrics (e.g., blood pressure, height).</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Multinomial Naive Bayes</strong></td>
-                                <td>Optimized for discrete quantitative data representing frequencies or occurrence counts.</td>
-                                <td>Document categorization based on term frequency matrices.</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Bernoulli Naive Bayes</strong></td>
-                                <td>Tailored for multivariate Bernoulli distributions; features represent independent boolean (binary) variables.</td>
-                                <td>Spam identification using binary presence/absence indicators of specific vocabulary.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="content-block"><p>The statistical nature of the features dictates the specific distributional assumption (variant) required for the Naive Bayes classifier:</p></div>
+                    <table class="styled-table"><thead><tr><th>Distribution Model</th><th>Applicability &amp; Assumption</th><th>Prototypical Use Case</th></tr></thead><tbody>
+                        <tr><td><strong>Gaussian Naive Bayes</strong></td><td>Designed for continuous, numerical features. Assumes the likelihood of features follows a Gaussian (normal) distribution.</td><td>Predicting continuous biological metrics (e.g., blood pressure, height).</td></tr>
+                        <tr><td><strong>Multinomial Naive Bayes</strong></td><td>Optimized for discrete quantitative data representing frequencies or occurrence counts.</td><td>Document categorization based on term frequency matrices.</td></tr>
+                        <tr><td><strong>Bernoulli Naive Bayes</strong></td><td>Tailored for multivariate Bernoulli distributions; features represent independent boolean (binary) variables.</td><td>Spam identification using binary presence/absence indicators of specific vocabulary.</td></tr>
+                    </tbody></table>
                 </div>
-
                 <div class="tab-content" id="code-tab">
-                    <div class="content-block">
-                        <p>Real-world implementation using Python and the scikit-learn machine learning library:</p>
-                    </div>
-                    <div class="code-block-wrapper">
-                        <h3>Gaussian Naive Bayes (Continuous Data)</h3>
-<pre><code>import pandas as pd
+                    <div class="content-block"><p>Real-world implementation using Python and the scikit-learn machine learning library:</p></div>
+                    <div class="code-block-wrapper"><h3>Gaussian Naive Bayes (Continuous Data)</h3><pre><code>import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
 
-# 1. Load dataset
 df = pd.read_csv('data.csv')
 X = df.drop('target', axis=1)
 y = df['target']
 
-# 2. Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 3. Initialize and Train Model
 model = GaussianNB()
 model.fit(X_train, y_train)
 
-# 4. Predict and Evaluate
 predictions = model.predict(X_test)
-print(f"Accuracy: {accuracy_score(y_test, predictions):.2f}")</code></pre>
-                    </div>
-                    
-                    <div class="code-block-wrapper">
-                        <h3>Multinomial Naive Bayes (Text/Count Data)</h3>
-<pre><code>from sklearn.feature_extraction.text import CountVectorizer
+print(f"Accuracy: {accuracy_score(y_test, predictions):.2f}")</code></pre></div>
+                    <div class="code-block-wrapper"><h3>Multinomial Naive Bayes (Text/Count Data)</h3><pre><code>from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import make_pipeline
 
-# 1. Sample text data and labels
 texts = ["win free cash", "meeting at noon", "free lottery", "urgent review"]
 labels = ["spam", "ham", "spam", "ham"]
 
-# 2. Create a pipeline (Vectorization + Naive Bayes)
 model = make_pipeline(CountVectorizer(), MultinomialNB())
-
-# 3. Train Model
 model.fit(texts, labels)
 
-# 4. Predict new data
 new_email = ["claim your free prize"]
-print("Prediction:", model.predict(new_email))</code></pre>
-                    </div>
+print("Prediction:", model.predict(new_email))</code></pre></div>
                 </div>
             </div>
         </section>
 
-        <!-- Section 9: Prediction -->
         <section id="prediction" class="card fade-in">
             <h2><i class="fas fa-magic icon-heading"></i> 9. Interactive Predictive Modeling</h2>
-            
             <div class="edu-layer">
                 <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> A live, interactive demo of the algorithm.</p>
                 <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> It solidifies understanding by letting you change variables and instantly see the mathematical outcome.</p>
             </div>
-
             <div class="content-block">
                 <p><strong>Experimentation:</strong> Specify hypothetical atmospheric parameters using the interface below. The engine will dynamically compute the posterior probabilities applying the methodology detailed in Section 7.</p>
                 <p class="formula-inline"><strong>Formula applied:</strong> \( \text{Score} = P(\text{Class}) \times P(\text{Outlook}|\text{Class}) \times P(\text{Humidity}|\text{Class}) \times P(\text{Wind}|\text{Class}) \)</p>
             </div>
-            
             <div class="prediction-form">
-                <div class="form-group">
-                    <label for="inputOutlook">Outlook Condition</label>
-                    <select id="inputOutlook" class="form-control">
-                        <option value="Sunny">Sunny</option>
-                        <option value="Overcast">Overcast</option>
-                        <option value="Rain">Rain</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="inputHumidity">Humidity Level</label>
-                    <select id="inputHumidity" class="form-control">
-                        <option value="High">High</option>
-                        <option value="Normal">Normal</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="inputWind">Wind Intensity</label>
-                    <select id="inputWind" class="form-control">
-                        <option value="Weak">Weak</option>
-                        <option value="Strong">Strong</option>
-                    </select>
-                </div>
+                <div class="form-group"><label for="inputOutlook">Outlook Condition</label><select id="inputOutlook" class="form-control"><option value="Sunny">Sunny</option><option value="Overcast">Overcast</option><option value="Rain">Rain</option></select></div>
+                <div class="form-group"><label for="inputHumidity">Humidity Level</label><select id="inputHumidity" class="form-control"><option value="High">High</option><option value="Normal">Normal</option></select></div>
+                <div class="form-group"><label for="inputWind">Wind Intensity</label><select id="inputWind" class="form-control"><option value="Weak">Weak</option><option value="Strong">Strong</option></select></div>
                 <button id="predictBtn" class="btn"><i class="fas fa-cogs"></i> Execute Prediction</button>
             </div>
-
             <div id="predictionResult" class="result-box" style="display: none;">
                 <h3><i class="fas fa-poll"></i> Step-by-Step Calculation</h3>
-                
-                <div class="calc-steps">
-                    <div class="calc-step">
-                        <h4>1. Calculate Score for YES</h4>
-                        <div class="math-block" id="calcYesText"></div>
-                    </div>
-                    <div class="calc-step">
-                        <h4>2. Calculate Score for NO</h4>
-                        <div class="math-block" id="calcNoText"></div>
-                    </div>
-                </div>
-
-                <div class="final-verdict-box">
-                    <h4>3. Final Prediction</h4>
-                    <h2 id="finalVerdict" class="verdict-heading"></h2>
-                    <p id="verdictExplanation"></p>
-                </div>
+                <div class="calc-steps"><div class="calc-step"><h4>1. Calculate Score for YES</h4><div class="math-block" id="calcYesText"></div></div><div class="calc-step"><h4>2. Calculate Score for NO</h4><div class="math-block" id="calcNoText"></div></div></div>
+                <div class="final-verdict-box"><h4>3. Final Prediction</h4><h2 id="finalVerdict" class="verdict-heading"></h2><p id="verdictExplanation"></p></div>
             </div>
         </section>
 
-        <!-- Section 10: Evaluation -->
         <section id="evaluation" class="card fade-in">
             <h2><i class="fas fa-check-double icon-heading"></i> 10. Model Evaluation Metrics</h2>
-            
             <div class="edu-layer">
                 <p><i class="fas fa-question-circle"></i> <strong>What is this?</strong> Standardized formulas used to judge how well a model performs.</p>
                 <p><i class="fas fa-lightbulb"></i> <strong>Why is it important?</strong> Accuracy alone is misleading. These metrics give a comprehensive view of the model's strengths and weaknesses.</p>
             </div>
-
-            <div class="content-block">
-                <p><strong>Definition:</strong> Post-training performance quantification is imperative. Metrics are derived from the Confusion Matrix, which cross-tabulates predicted classifications against empirical truths (True Positives, True Negatives, False Positives, False Negatives).</p>
-            </div>
-            
+            <div class="content-block"><p><strong>Definition:</strong> Post-training performance quantification is imperative. Metrics are derived from the Confusion Matrix, which cross-tabulates predicted classifications against empirical truths (True Positives, True Negatives, False Positives, False Negatives).</p></div>
             <div class="metrics-grid">
-                <div class="metric-card">
-                    <h4><i class="fas fa-bullseye icon-metric"></i> Accuracy</h4>
-                    <p class="metric-def">The ratio of correctly predicted observations to the total observations.</p>
-                    <div class="metric-formula">\[ \frac{TP + TN}{Total} \]</div>
-                    <p class="metric-interp"><em>Interpretation:</em> General effectiveness. Can be misleading if classes are highly imbalanced.</p>
-                </div>
-                <div class="metric-card">
-                    <h4><i class="fas fa-compress-arrows-alt icon-metric"></i> Precision</h4>
-                    <p class="metric-def">The proportion of positive identifications that were actually correct.</p>
-                    <div class="metric-formula">\[ \frac{TP}{TP + FP} \]</div>
-                    <p class="metric-interp"><em>Interpretation:</em> Crucial when the cost of a False Positive is high (e.g., spam filtering).</p>
-                </div>
-                <div class="metric-card">
-                    <h4><i class="fas fa-search icon-metric"></i> Recall (Sensitivity)</h4>
-                    <p class="metric-def">The proportion of actual positives that were correctly identified.</p>
-                    <div class="metric-formula">\[ \frac{TP}{TP + FN} \]</div>
-                    <p class="metric-interp"><em>Interpretation:</em> Critical when the cost of a False Negative is high (e.g., medical diagnosis).</p>
-                </div>
-                <div class="metric-card">
-                    <h4><i class="fas fa-balance-scale icon-metric"></i> F1-Score</h4>
-                    <p class="metric-def">The harmonic mean of Precision and Recall, providing a single balanced metric.</p>
-                    <div class="metric-formula">\[ 2 \times \frac{Precision \times Recall}{Precision + Recall} \]</div>
-                    <p class="metric-interp"><em>Interpretation:</em> The preferred metric when dealing with uneven class distributions.</p>
-                </div>
+                <div class="metric-card"><h4><i class="fas fa-bullseye icon-metric"></i> Accuracy</h4><p class="metric-def">The ratio of correctly predicted observations to the total observations.</p><div class="metric-formula">\[ \frac{TP + TN}{Total} \]</div><p class="metric-interp"><em>Interpretation:</em> General effectiveness. Can be misleading if classes are highly imbalanced.</p></div>
+                <div class="metric-card"><h4><i class="fas fa-compress-arrows-alt icon-metric"></i> Precision</h4><p class="metric-def">The proportion of positive identifications that were actually correct.</p><div class="metric-formula">\[ \frac{TP}{TP + FP} \]</div><p class="metric-interp"><em>Interpretation:</em> Crucial when the cost of a False Positive is high (e.g., spam filtering).</p></div>
+                <div class="metric-card"><h4><i class="fas fa-search icon-metric"></i> Recall (Sensitivity)</h4><p class="metric-def">The proportion of actual positives that were correctly identified.</p><div class="metric-formula">\[ \frac{TP}{TP + FN} \]</div><p class="metric-interp"><em>Interpretation:</em> Critical when the cost of a False Negative is high (e.g., medical diagnosis).</p></div>
+                <div class="metric-card"><h4><i class="fas fa-balance-scale icon-metric"></i> F1-Score</h4><p class="metric-def">The harmonic mean of Precision and Recall, providing a single balanced metric.</p><div class="metric-formula">\[ 2 \times \frac{Precision \times Recall}{Precision + Recall} \]</div><p class="metric-interp"><em>Interpretation:</em> The preferred metric when dealing with uneven class distributions.</p></div>
             </div>
         </section>
 
-        <!-- FOOTER - CORRECTED WITH MOHAMMAD DANISH -->
         <footer class="main-footer">
             <div class="footer-content">
                 <h3>Naive Bayes Educational Dashboard</h3>
@@ -1333,18 +367,15 @@ print("Prediction:", model.predict(new_email))</code></pre>
 </div>
 
 <script>
-// LocalStorage for Sidebar Progress
+// All JavaScript code here (same as before)
 let completedSections = JSON.parse(localStorage.getItem('naiveBayesProgress')) || [];
-
 function updateSidebarProgress() {
+    const navLinks = document.querySelectorAll('.sidebar ul li a');
     navLinks.forEach(link => {
         const sectionId = link.getAttribute('href').substring(1);
-        if (completedSections.includes(sectionId)) {
-            link.classList.add('completed');
-        }
+        if (completedSections.includes(sectionId)) link.classList.add('completed');
     });
 }
-
 function markSectionCompleted(sectionId) {
     if (!completedSections.includes(sectionId)) {
         completedSections.push(sectionId);
@@ -1352,349 +383,102 @@ function markSectionCompleted(sectionId) {
         updateSidebarProgress();
     }
 }
-
-// Sidebar active link logic
 const sections = document.querySelectorAll('section');
 const navLinks = document.querySelectorAll('.sidebar ul li a');
-
-// Initialize sidebar progress on load
 updateSidebarProgress();
-
-// Reset progress logic
-const resetProgressBtn = document.getElementById('resetProgressBtn');
-if (resetProgressBtn) {
-    resetProgressBtn.addEventListener('click', () => {
-        if(confirm('Are you sure you want to reset your learning progress?')) {
-            completedSections = [];
-            localStorage.removeItem('naiveBayesProgress');
-            navLinks.forEach(link => link.classList.remove('completed'));
-        }
-    });
-}
-
+document.getElementById('resetProgressBtn')?.addEventListener('click', () => {
+    if(confirm('Reset progress?')) { completedSections = []; localStorage.removeItem('naiveBayesProgress'); navLinks.forEach(l => l.classList.remove('completed')); }
+});
 window.addEventListener('scroll', () => {
     let current = '';
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
-        if (pageYOffset >= (sectionTop - sectionHeight / 3)) {
-            current = section.getAttribute('id');
-        }
-    });
-
+    sections.forEach(section => { if(pageYOffset >= (section.offsetTop - section.clientHeight/3)) current = section.getAttribute('id'); });
     navLinks.forEach(link => {
         link.classList.remove('active');
-        if (link.getAttribute('href').includes(current)) {
-            link.classList.add('active');
-            if (current) {
-                markSectionCompleted(current);
-            }
-        }
+        if(link.getAttribute('href').includes(current)) { link.classList.add('active'); if(current) markSectionCompleted(current); }
     });
 });
-
-// Smooth scrolling and mark as completed on click
 navLinks.forEach(link => {
     link.addEventListener('click', function(e) {
         e.preventDefault();
         const targetId = this.getAttribute('href').substring(1);
         markSectionCompleted(targetId);
-        const targetSection = document.getElementById(targetId);
-        window.scrollTo({
-            top: targetSection.offsetTop - 20,
-            behavior: 'smooth'
-        });
+        document.getElementById(targetId).scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 });
-
-// Tab Switching Logic for Code Section
 const tabBtns = document.querySelectorAll('.tab-btn');
-const tabContents = document.querySelectorAll('.tab-content');
-
 tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
         tabBtns.forEach(b => b.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         btn.classList.add('active');
-        const targetId = btn.getAttribute('data-target');
-        document.getElementById(targetId).classList.add('active');
+        document.getElementById(btn.getAttribute('data-target')).classList.add('active');
     });
 });
-
-// PapaParse CSV Upload logic
-const csvFileInput = document.getElementById('csvFileInput');
-const uploadBtn = document.getElementById('uploadBtn');
-const tableContainer = document.getElementById('tableContainer');
-const csvTableHead = document.querySelector('#csvTable thead');
-const csvTableBody = document.querySelector('#csvTable tbody');
-
-let edaChartInstance = null;
-let edaPieChartInstance = null;
-
-uploadBtn.addEventListener('click', () => {
-    const file = csvFileInput.files[0];
-    if (!file) {
-        alert("Please select a CSV file first.");
-        return;
-    }
-
-    Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-            const data = results.data;
-            if (data.length > 0) {
-                renderTable(data);
-                generateEDA(data);
-            }
-        }
-    });
+let edaChartInstance = null, edaPieChartInstance = null;
+document.getElementById('uploadBtn')?.addEventListener('click', () => {
+    const file = document.getElementById('csvFileInput').files[0];
+    if(!file) { alert("Select CSV file"); return; }
+    Papa.parse(file, { header: true, skipEmptyLines: true, complete: function(results) {
+        if(results.data.length) { renderTable(results.data); generateEDA(results.data); }
+    }});
 });
-
 function renderTable(data) {
-    csvTableHead.innerHTML = '';
-    csvTableBody.innerHTML = '';
-
+    const thead = document.querySelector('#csvTable thead'), tbody = document.querySelector('#csvTable tbody');
+    thead.innerHTML = ''; tbody.innerHTML = '';
     const headers = Object.keys(data[0]);
-    const headerRow = document.createElement('tr');
-    headers.forEach(headerText => {
-        const th = document.createElement('th');
-        th.textContent = headerText;
-        headerRow.appendChild(th);
-    });
-    csvTableHead.appendChild(headerRow);
-
-    const rowsToShow = Math.min(5, data.length);
-    for (let i = 0; i < rowsToShow; i++) {
-        const tr = document.createElement('tr');
-        headers.forEach(headerText => {
-            const td = document.createElement('td');
-            td.textContent = data[i][headerText];
-            tr.appendChild(td);
-        });
-        csvTableBody.appendChild(tr);
+    const tr = document.createElement('tr');
+    headers.forEach(h => { const th = document.createElement('th'); th.textContent = h; tr.appendChild(th); });
+    thead.appendChild(tr);
+    for(let i=0; i<Math.min(5,data.length); i++) {
+        const row = document.createElement('tr');
+        headers.forEach(h => { const td = document.createElement('td'); td.textContent = data[i][h]; row.appendChild(td); });
+        tbody.appendChild(row);
     }
-    tableContainer.style.display = 'block';
+    document.getElementById('tableContainer').style.display = 'block';
 }
-
 function generateEDA(data) {
-    const headers = Object.keys(data[0]);
-    const targetColumn = headers[headers.length - 1];
-
-    const classCounts = {};
-    data.forEach(row => {
-        const val = row[targetColumn];
-        if(val) classCounts[val] = (classCounts[val] || 0) + 1;
-    });
-
-    const labels = Object.keys(classCounts);
-    const counts = Object.values(classCounts);
-
-    const ctxBar = document.getElementById('edaChart').getContext('2d');
-    const ctxPie = document.getElementById('edaPieChart').getContext('2d');
-    
-    if (edaChartInstance) edaChartInstance.destroy();
-    if (edaPieChartInstance) edaPieChartInstance.destroy();
-
+    const headers = Object.keys(data[0]), target = headers[headers.length-1];
+    const counts = {};
+    data.forEach(row => { const val = row[target]; if(val) counts[val] = (counts[val]||0)+1; });
+    const labels = Object.keys(counts), values = Object.values(counts);
+    if(edaChartInstance) edaChartInstance.destroy();
+    if(edaPieChartInstance) edaPieChartInstance.destroy();
     document.getElementById('chartPlaceholder').style.display = 'none';
     document.getElementById('edaChartsGrid').style.display = 'grid';
-
-    const colors = [
-        'rgba(41, 128, 185, 0.8)',
-        'rgba(231, 76, 60, 0.8)',
-        'rgba(46, 204, 113, 0.8)',
-        'rgba(241, 196, 15, 0.8)'
-    ];
-    const borderColors = colors.map(c => c.replace('0.8', '1'));
-
-    edaChartInstance = new Chart(ctxBar, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Count',
-                data: counts,
-                backgroundColor: colors,
-                borderColor: borderColors,
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) { return `Count: ${context.raw}`; }
-                    }
-                }
-            },
-            scales: { y: { beginAtZero: true } }
-        }
-    });
-
-    edaPieChartInstance = new Chart(ctxPie, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: counts,
-                backgroundColor: colors,
-                borderColor: borderColors,
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom' },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const total = context.dataset.data.reduce((a,b)=>a+b, 0);
-                            const percent = ((context.raw / total) * 100).toFixed(1);
-                            return `${context.label}: ${context.raw} (${percent}%)`;
-                        }
-                    }
-                }
-            }
-        }
-    });
+    const colors = ['rgba(41,128,185,0.8)', 'rgba(231,76,60,0.8)', 'rgba(46,204,113,0.8)'];
+    edaChartInstance = new Chart(document.getElementById('edaChart'), { type: 'bar', data: { labels, datasets: [{ label: 'Count', data: values, backgroundColor: colors }] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } });
+    edaPieChartInstance = new Chart(document.getElementById('edaPieChart'), { type: 'doughnut', data: { labels, datasets: [{ data: values, backgroundColor: colors }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } });
 }
-
-// Training Logic Simulation
-const splitSlider = document.getElementById('splitSlider');
-const splitValue = document.getElementById('splitValue');
-const trainBtn = document.getElementById('trainBtn');
-const trainingProgress = document.getElementById('trainingProgress');
-const trainingSummary = document.getElementById('trainingSummary');
-
-if (splitSlider) {
-    splitSlider.addEventListener('input', (e) => {
-        const trainPct = e.target.value;
-        const testPct = 100 - trainPct;
-        splitValue.textContent = `${trainPct}% Train / ${testPct}% Test`;
-    });
-}
-
-if (trainBtn) {
-    trainBtn.addEventListener('click', () => {
-        trainingSummary.style.display = 'none';
-        trainingProgress.style.display = 'block';
-        trainBtn.disabled = true;
-        trainBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Training...';
-        
-        let progress = 0;
-        const fill = document.querySelector('.progress-fill');
-        const interval = setInterval(() => {
-            progress += 20;
-            fill.style.width = `${progress}%`;
-            
-            if (progress >= 100) {
-                clearInterval(interval);
-                setTimeout(() => {
-                    trainingProgress.style.display = 'none';
-                    trainingSummary.style.display = 'block';
-                    fill.style.width = '0%';
-                    trainBtn.disabled = false;
-                    trainBtn.innerHTML = '<i class="fas fa-play"></i> Train Model';
-                }, 400);
-            }
-        }, 200);
-    });
-}
-
-// Prediction Logic Demo (Weather Dataset)
+document.getElementById('trainBtn')?.addEventListener('click', () => {
+    const progress = document.getElementById('trainingProgress'), summary = document.getElementById('trainingSummary');
+    summary.style.display = 'none'; progress.style.display = 'block';
+    let p=0; const fill = document.querySelector('.progress-fill');
+    const interval = setInterval(() => { p+=20; fill.style.width=p+'%'; if(p>=100){ clearInterval(interval); setTimeout(()=>{ progress.style.display='none'; summary.style.display='block'; fill.style.width='0%'; },400); } },200);
+});
 const priors = { Yes: 9/14, No: 5/14 };
-const likelihoods = {
-    Yes: {
-        Outlook: { Sunny: 2/9, Overcast: 4/9, Rain: 3/9 },
-        Humidity: { High: 3/9, Normal: 6/9 },
-        Wind: { Weak: 6/9, Strong: 3/9 }
-    },
-    No: {
-        Outlook: { Sunny: 3/5, Overcast: 0/5, Rain: 2/5 },
-        Humidity: { High: 4/5, Normal: 1/5 },
-        Wind: { Weak: 2/5, Strong: 3/5 }
-    }
-};
-
-const predictBtn = document.getElementById('predictBtn');
-if (predictBtn) {
-    predictBtn.addEventListener('click', () => {
-        const outlook = document.getElementById('inputOutlook').value;
-        const humidity = document.getElementById('inputHumidity').value;
-        const wind = document.getElementById('inputWind').value;
-
-        const probYes = priors.Yes * likelihoods.Yes.Outlook[outlook] * likelihoods.Yes.Humidity[humidity] * likelihoods.Yes.Wind[wind];
-        const probNo = priors.No * likelihoods.No.Outlook[outlook] * likelihoods.No.Humidity[humidity] * likelihoods.No.Wind[wind];
-
-        const resultBox = document.getElementById('predictionResult');
-        const calcYesText = document.getElementById('calcYesText');
-        const calcNoText = document.getElementById('calcNoText');
-        const finalVerdict = document.getElementById('finalVerdict');
-        const verdictExplanation = document.getElementById('verdictExplanation');
-
-        calcYesText.innerHTML = `P(Yes) &times; P(${outlook}|Yes) &times; P(${humidity}|Yes) &times; P(${wind}|Yes) <br><br> = ${priors.Yes.toFixed(3)} &times; ${likelihoods.Yes.Outlook[outlook].toFixed(3)} &times; ${likelihoods.Yes.Humidity[humidity].toFixed(3)} &times; ${likelihoods.Yes.Wind[wind].toFixed(3)} <br><br> = <strong>${probYes.toFixed(4)}</strong>`;
-        
-        calcNoText.innerHTML = `P(No) &times; P(${outlook}|No) &times; P(${humidity}|No) &times; P(${wind}|No) <br><br> = ${priors.No.toFixed(3)} &times; ${likelihoods.No.Outlook[outlook].toFixed(3)} &times; ${likelihoods.No.Humidity[humidity].toFixed(3)} &times; ${likelihoods.No.Wind[wind].toFixed(3)} <br><br> = <strong>${probNo.toFixed(4)}</strong>`;
-
-        const verdictBox = document.querySelector('.final-verdict-box');
-
-        if (probYes > probNo) {
-            finalVerdict.innerHTML = "YES (Play Golf)";
-            finalVerdict.style.color = "#16a34a";
-            verdictBox.style.borderColor = "#16a34a";
-            verdictBox.style.backgroundColor = "#eafaf1";
-            verdictExplanation.innerHTML = `Because <strong>${probYes.toFixed(4)}</strong> > <strong>${probNo.toFixed(4)}</strong>, the model assigns the class 'Yes'.`;
-        } else {
-            finalVerdict.innerHTML = "NO (Do NOT Play Golf)";
-            finalVerdict.style.color = "#dc2626";
-            verdictBox.style.borderColor = "#dc2626";
-            verdictBox.style.backgroundColor = "#fef2f2";
-            verdictExplanation.innerHTML = `Because <strong>${probNo.toFixed(4)}</strong> > <strong>${probYes.toFixed(4)}</strong>, the model assigns the class 'No'.`;
-        }
-
-        resultBox.style.display = 'block';
-        
-        setTimeout(() => {
-            resultBox.scrollIntoView({behavior: 'smooth', block: 'nearest'});
-        }, 100);
-    });
-}
-
-// Missing values handler
-const applyMissingBtn = document.getElementById('applyMissingBtn');
-if (applyMissingBtn) {
-    applyMissingBtn.addEventListener('click', () => {
-        const strategy = document.getElementById('missingStrategy').value;
-        const resultCell = document.querySelector('#missingResultTable tbody tr:nth-child(2) td');
-        if (strategy === 'mean') {
-            resultCell.innerHTML = '30 (Mean)';
-            resultCell.style.color = '#16a34a';
-        } else if (strategy === 'median') {
-            resultCell.innerHTML = '30 (Median)';
-            resultCell.style.color = '#16a34a';
-        } else if (strategy === 'drop') {
-            resultCell.innerHTML = 'Row Removed';
-            resultCell.style.color = '#e74c3c';
-        }
-    });
-}
-
-// Encoding handler
-const applyEncodingBtn = document.getElementById('applyEncodingBtn');
-if (applyEncodingBtn) {
-    applyEncodingBtn.addEventListener('click', () => {
-        const strategy = document.getElementById('encodingStrategy').value;
-        const table = document.getElementById('encodingResultTable');
-        if (strategy === 'label') {
-            table.innerHTML = '<tr><th>Color</th></tr><tr><td style="color:#16a34a; font-weight:bold;">0</td></tr><tr><td style="color:#16a34a; font-weight:bold;">1</td></tr>';
-        } else if (strategy === 'onehot') {
-            table.innerHTML = '<tr><th>Red</th><th>Blue</th></tr><tr><td style="color:#16a34a; font-weight:bold;">1</td><td style="color:#16a34a; font-weight:bold;">0</td></tr><tr><td style="color:#16a34a; font-weight:bold;">0</td><td style="color:#16a34a; font-weight:bold;">1</td></tr>';
-        }
-    });
-}
+const likes = { Yes: { Outlook: { Sunny:2/9, Overcast:4/9, Rain:3/9 }, Humidity: { High:3/9, Normal:6/9 }, Wind: { Weak:6/9, Strong:3/9 } }, No: { Outlook: { Sunny:3/5, Overcast:0, Rain:2/5 }, Humidity: { High:4/5, Normal:1/5 }, Wind: { Weak:2/5, Strong:3/5 } } };
+document.getElementById('predictBtn')?.addEventListener('click', () => {
+    const outlook = document.getElementById('inputOutlook').value, humidity = document.getElementById('inputHumidity').value, wind = document.getElementById('inputWind').value;
+    const probYes = priors.Yes * likes.Yes.Outlook[outlook] * likes.Yes.Humidity[humidity] * likes.Yes.Wind[wind];
+    const probNo = priors.No * likes.No.Outlook[outlook] * likes.No.Humidity[humidity] * likes.No.Wind[wind];
+    document.getElementById('calcYesText').innerHTML = `P(Yes) × P(${outlook}|Yes) × P(${humidity}|Yes) × P(${wind}|Yes)<br><br> = ${priors.Yes.toFixed(3)} × ${likes.Yes.Outlook[outlook].toFixed(3)} × ${likes.Yes.Humidity[humidity].toFixed(3)} × ${likes.Yes.Wind[wind].toFixed(3)}<br><br> = <strong>${probYes.toFixed(4)}</strong>`;
+    document.getElementById('calcNoText').innerHTML = `P(No) × P(${outlook}|No) × P(${humidity}|No) × P(${wind}|No)<br><br> = ${priors.No.toFixed(3)} × ${likes.No.Outlook[outlook].toFixed(3)} × ${likes.No.Humidity[humidity].toFixed(3)} × ${likes.No.Wind[wind].toFixed(3)}<br><br> = <strong>${probNo.toFixed(4)}</strong>`;
+    const verdict = document.getElementById('finalVerdict'), expl = document.getElementById('verdictExplanation'), box = document.querySelector('.final-verdict-box');
+    if(probYes > probNo) { verdict.innerHTML = "YES (Play Golf)"; verdict.style.color = "#16a34a"; box.style.borderColor = "#16a34a"; box.style.backgroundColor = "#eafaf1"; expl.innerHTML = `Because ${probYes.toFixed(4)} > ${probNo.toFixed(4)}, the model assigns 'Yes'.`; }
+    else { verdict.innerHTML = "NO (Do NOT Play Golf)"; verdict.style.color = "#dc2626"; box.style.borderColor = "#dc2626"; box.style.backgroundColor = "#fef2f2"; expl.innerHTML = `Because ${probNo.toFixed(4)} > ${probYes.toFixed(4)}, the model assigns 'No'.`; }
+    document.getElementById('predictionResult').style.display = 'block';
+});
+document.getElementById('applyMissingBtn')?.addEventListener('click', () => {
+    const s = document.getElementById('missingStrategy').value, cell = document.querySelector('#missingResultTable tbody tr:nth-child(2) td');
+    if(s === 'mean') cell.innerHTML = '30 (Mean)';
+    else if(s === 'median') cell.innerHTML = '30 (Median)';
+    else cell.innerHTML = 'Row Removed';
+});
+document.getElementById('applyEncodingBtn')?.addEventListener('click', () => {
+    const s = document.getElementById('encodingStrategy').value, table = document.getElementById('encodingResultTable');
+    if(s === 'label') table.innerHTML = '<tr><th>Color</th></tr><tr><td>0</td></tr><tr><td>1</td></tr>';
+    else table.innerHTML = '<tr><th>Red</th><th>Blue</th><tr><td>1</td><td>0</td></tr><tr><td>0</td><td>1</td></tr>';
+});
 </script>
 </body>
 </html>
