@@ -51,7 +51,6 @@ window.addEventListener('scroll', () => {
         link.classList.remove('active');
         if (link.getAttribute('href').includes(current)) {
             link.classList.add('active');
-            // Mark as completed when user reaches this section
             if (current) {
                 markSectionCompleted(current);
             }
@@ -64,10 +63,7 @@ navLinks.forEach(link => {
     link.addEventListener('click', function(e) {
         e.preventDefault();
         const targetId = this.getAttribute('href').substring(1);
-        
-        // Mark as completed immediately on click
         markSectionCompleted(targetId);
-        
         const targetSection = document.getElementById(targetId);
         window.scrollTo({
             top: targetSection.offsetTop - 20,
@@ -82,11 +78,8 @@ const tabContents = document.querySelectorAll('.tab-content');
 
 tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-        // Remove active class from all
         tabBtns.forEach(b => b.classList.remove('active'));
         tabContents.forEach(c => c.classList.remove('active'));
-        
-        // Add active class to clicked button and target content
         btn.classList.add('active');
         const targetId = btn.getAttribute('data-target');
         document.getElementById(targetId).classList.add('active');
@@ -103,25 +96,27 @@ const csvTableBody = document.querySelector('#csvTable tbody');
 let edaChartInstance = null;
 let edaPieChartInstance = null;
 
-uploadBtn.addEventListener('click', () => {
-    const file = csvFileInput.files[0];
-    if (!file) {
-        alert("Please select a CSV file first.");
-        return;
-    }
-
-    Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-            const data = results.data;
-            if (data.length > 0) {
-                renderTable(data);
-                generateEDA(data);
-            }
+if (uploadBtn) {
+    uploadBtn.addEventListener('click', () => {
+        const file = csvFileInput.files[0];
+        if (!file) {
+            alert("Please select a CSV file first.");
+            return;
         }
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                const data = results.data;
+                if (data.length > 0) {
+                    renderTable(data);
+                    generateEDA(data);
+                }
+            }
+        });
     });
-});
+}
 
 function renderTable(data) {
     csvTableHead.innerHTML = '';
@@ -177,7 +172,6 @@ function generateEDA(data) {
         'rgba(46, 204, 113, 0.8)',
         'rgba(241, 196, 15, 0.8)'
     ];
-    const borderColors = colors.map(c => c.replace('0.8', '1'));
 
     edaChartInstance = new Chart(ctxBar, {
         type: 'bar',
@@ -187,19 +181,13 @@ function generateEDA(data) {
                 label: 'Count',
                 data: counts,
                 backgroundColor: colors,
-                borderColor: borderColors,
                 borderWidth: 1
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) { return `Count: ${context.raw}`; }
-                    }
-                }
+                legend: { display: false }
             },
             scales: { y: { beginAtZero: true } }
         }
@@ -212,23 +200,13 @@ function generateEDA(data) {
             datasets: [{
                 data: counts,
                 backgroundColor: colors,
-                borderColor: borderColors,
                 borderWidth: 1
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: { position: 'bottom' },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const total = context.dataset.data.reduce((a,b)=>a+b, 0);
-                            const percent = ((context.raw / total) * 100).toFixed(1);
-                            return `${context.label}: ${context.raw} (${percent}%)`;
-                        }
-                    }
-                }
+                legend: { position: 'bottom' }
             }
         }
     });
@@ -240,7 +218,6 @@ const splitValue = document.getElementById('splitValue');
 const trainBtn = document.getElementById('trainBtn');
 const trainingProgress = document.getElementById('trainingProgress');
 const trainingSummary = document.getElementById('trainingSummary');
-const summaryPriors = document.getElementById('summaryPriors');
 
 if (splitSlider) {
     splitSlider.addEventListener('input', (e) => {
@@ -271,12 +248,6 @@ if (trainBtn) {
                     fill.style.width = '0%';
                     trainBtn.disabled = false;
                     trainBtn.innerHTML = '<i class="fas fa-play"></i> Train Model';
-                    
-                    // Show mock summary based on Weather dataset priors
-                    summaryPriors.innerHTML = `
-                        <li><strong>P(Yes)</strong> = 9/14 &approx; 0.643</li>
-                        <li><strong>P(No)</strong> = 5/14 &approx; 0.357</li>
-                    `;
                 }, 400);
             }
         }, 200);
@@ -292,50 +263,85 @@ const likelihoods = {
         Wind: { Weak: 6/9, Strong: 3/9 }
     },
     No: {
-        Outlook: { Sunny: 3/5, Overcast: 0/5, Rain: 2/5 },
+        Outlook: { Sunny: 3/5, Overcast: 0, Rain: 2/5 },
         Humidity: { High: 4/5, Normal: 1/5 },
         Wind: { Weak: 2/5, Strong: 3/5 }
     }
 };
 
-document.getElementById('predictBtn').addEventListener('click', () => {
-    const outlook = document.getElementById('inputOutlook').value;
-    const humidity = document.getElementById('inputHumidity').value;
-    const wind = document.getElementById('inputWind').value;
+const predictBtn = document.getElementById('predictBtn');
+if (predictBtn) {
+    predictBtn.addEventListener('click', () => {
+        const outlook = document.getElementById('inputOutlook').value;
+        const humidity = document.getElementById('inputHumidity').value;
+        const wind = document.getElementById('inputWind').value;
 
-    const probYes = priors.Yes * likelihoods.Yes.Outlook[outlook] * likelihoods.Yes.Humidity[humidity] * likelihoods.Yes.Wind[wind];
-    const probNo = priors.No * likelihoods.No.Outlook[outlook] * likelihoods.No.Humidity[humidity] * likelihoods.No.Wind[wind];
+        const probYes = priors.Yes * likelihoods.Yes.Outlook[outlook] * likelihoods.Yes.Humidity[humidity] * likelihoods.Yes.Wind[wind];
+        const probNo = priors.No * likelihoods.No.Outlook[outlook] * likelihoods.No.Humidity[humidity] * likelihoods.No.Wind[wind];
 
-    const resultBox = document.getElementById('predictionResult');
-    const calcYesText = document.getElementById('calcYesText');
-    const calcNoText = document.getElementById('calcNoText');
-    const finalVerdict = document.getElementById('finalVerdict');
-    const verdictExplanation = document.getElementById('verdictExplanation');
+        const resultBox = document.getElementById('predictionResult');
+        const calcYesText = document.getElementById('calcYesText');
+        const calcNoText = document.getElementById('calcNoText');
+        const finalVerdict = document.getElementById('finalVerdict');
+        const verdictExplanation = document.getElementById('verdictExplanation');
 
-    calcYesText.innerHTML = `P(Yes) &times; P(${outlook}|Yes) &times; P(${humidity}|Yes) &times; P(${wind}|Yes) <br><br> = ${priors.Yes.toFixed(3)} &times; ${likelihoods.Yes.Outlook[outlook].toFixed(3)} &times; ${likelihoods.Yes.Humidity[humidity].toFixed(3)} &times; ${likelihoods.Yes.Wind[wind].toFixed(3)} <br><br> = <strong>${probYes.toFixed(4)}</strong>`;
-    
-    calcNoText.innerHTML = `P(No) &times; P(${outlook}|No) &times; P(${humidity}|No) &times; P(${wind}|No) <br><br> = ${priors.No.toFixed(3)} &times; ${likelihoods.No.Outlook[outlook].toFixed(3)} &times; ${likelihoods.No.Humidity[humidity].toFixed(3)} &times; ${likelihoods.No.Wind[wind].toFixed(3)} <br><br> = <strong>${probNo.toFixed(4)}</strong>`;
+        calcYesText.innerHTML = `P(Yes) × P(${outlook}|Yes) × P(${humidity}|Yes) × P(${wind}|Yes) <br><br> = ${priors.Yes.toFixed(3)} × ${likelihoods.Yes.Outlook[outlook].toFixed(3)} × ${likelihoods.Yes.Humidity[humidity].toFixed(3)} × ${likelihoods.Yes.Wind[wind].toFixed(3)} <br><br> = <strong>${probYes.toFixed(4)}</strong>`;
+        
+        calcNoText.innerHTML = `P(No) × P(${outlook}|No) × P(${humidity}|No) × P(${wind}|No) <br><br> = ${priors.No.toFixed(3)} × ${likelihoods.No.Outlook[outlook].toFixed(3)} × ${likelihoods.No.Humidity[humidity].toFixed(3)} × ${likelihoods.No.Wind[wind].toFixed(3)} <br><br> = <strong>${probNo.toFixed(4)}</strong>`;
 
-    const verdictBox = document.querySelector('.final-verdict-box');
+        const verdictBox = document.querySelector('.final-verdict-box');
 
-    if (probYes > probNo) {
-        finalVerdict.innerHTML = "YES (Play Golf)";
-        finalVerdict.style.color = "#16a34a"; // green
-        verdictBox.style.borderColor = "#16a34a";
-        verdictBox.style.backgroundColor = "#eafaf1";
-        verdictExplanation.innerHTML = `Because <strong>${probYes.toFixed(4)}</strong> > <strong>${probNo.toFixed(4)}</strong>, the model assigns the class 'Yes'.`;
-    } else {
-        finalVerdict.innerHTML = "NO (Do NOT Play Golf)";
-        finalVerdict.style.color = "#dc2626"; // red
-        verdictBox.style.borderColor = "#dc2626";
-        verdictBox.style.backgroundColor = "#fef2f2";
-        verdictExplanation.innerHTML = `Because <strong>${probNo.toFixed(4)}</strong> > <strong>${probYes.toFixed(4)}</strong>, the model assigns the class 'No'.`;
-    }
+        if (probYes > probNo) {
+            finalVerdict.innerHTML = "YES (Play Golf)";
+            finalVerdict.style.color = "#16a34a";
+            verdictBox.style.borderColor = "#16a34a";
+            verdictBox.style.backgroundColor = "#eafaf1";
+            verdictExplanation.innerHTML = `Because <strong>${probYes.toFixed(4)}</strong> > <strong>${probNo.toFixed(4)}</strong>, the model assigns the class 'Yes'.`;
+        } else {
+            finalVerdict.innerHTML = "NO (Do NOT Play Golf)";
+            finalVerdict.style.color = "#dc2626";
+            verdictBox.style.borderColor = "#dc2626";
+            verdictBox.style.backgroundColor = "#fef2f2";
+            verdictExplanation.innerHTML = `Because <strong>${probNo.toFixed(4)}</strong> > <strong>${probYes.toFixed(4)}</strong>, the model assigns the class 'No'.`;
+        }
 
-    resultBox.style.display = 'block';
-    
-    // Slight delay to allow render before scrolling
-    setTimeout(() => {
-        resultBox.scrollIntoView({behavior: 'smooth', block: 'nearest'});
-    }, 100);
-});
+        resultBox.style.display = 'block';
+        
+        setTimeout(() => {
+            resultBox.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+        }, 100);
+    });
+}
+
+// Missing values handler
+const applyMissingBtn = document.getElementById('applyMissingBtn');
+if (applyMissingBtn) {
+    applyMissingBtn.addEventListener('click', () => {
+        const strategy = document.getElementById('missingStrategy').value;
+        const resultCell = document.querySelector('#missingResultTable tbody tr:nth-child(2) td');
+        if (strategy === 'mean') {
+            resultCell.innerHTML = '30 (Mean)';
+            resultCell.style.color = '#16a34a';
+        } else if (strategy === 'median') {
+            resultCell.innerHTML = '30 (Median)';
+            resultCell.style.color = '#16a34a';
+        } else if (strategy === 'drop') {
+            resultCell.innerHTML = 'Row Removed';
+            resultCell.style.color = '#e74c3c';
+        }
+    });
+}
+
+// Encoding handler
+const applyEncodingBtn = document.getElementById('applyEncodingBtn');
+if (applyEncodingBtn) {
+    applyEncodingBtn.addEventListener('click', () => {
+        const strategy = document.getElementById('encodingStrategy').value;
+        const table = document.getElementById('encodingResultTable');
+        if (strategy === 'label') {
+            table.innerHTML = '<tr><th>Color</th></tr><tr><td style="color:#16a34a;">0</td></tr><tr><td style="color:#16a34a;">1</td></tr>';
+        } else if (strategy === 'onehot') {
+            table.innerHTML = '<tr><th>Red</th><th>Blue</th></tr><tr><td style="color:#16a34a;">1</td><td style="color:#16a34a;">0</td></tr><tr><td style="color:#16a34a;">0</td><td style="color:#16a34a;">1</td></tr>';
+        }
+    });
+}
